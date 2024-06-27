@@ -92,9 +92,19 @@ The following repositories contain: this tutorial (immuno_gcp_wdl), the WDL work
 ```bash
 mkdir git
 cd git
-git clone git@github.com:griffithlab/immuno_gcp_wdl_local.git # (v1.0.0)
-git clone git@github.com:griffithlab/analysis-wdls.git # (v.1.0.0)
-git clone git@github.com:griffithlab/cloud-workflows.git # (v.1.3.0)
+
+git clone git@github.com:evelyn-schmidt/immuno_gcp_wdl_manuscript.git 
+
+git clone git@github.com:griffithlab/analysis-wdls.git # (v1.1.4)
+cd analysis-wdls/
+git checkout tags/v1.1.4
+cd ../
+
+git clone git@github.com:griffithlab/cloud-workflows.git # (v1.3.1)
+cd cloud-workflows/
+git checkout tags/v1.3.1
+cd ../
+
 ```
 
 ### Login to GCP and set the desired project
@@ -107,12 +117,33 @@ gcloud config list
 
 The `gcloud config list` command can be used to remind yourself how you are currently authenticated to use Google Cloud Services. This can be helpful because on your host machine, you will be authenticated using your personal account. However, on the Google VM where the workflow will be orchestrated by Cromwell, you will be authenticated using a "service" account. 
 
+You can create multiple configurations 
+
+```bash
+gcloud config configurations list # see the cofigurations already created
+gcloud config configurations create test # create a new configuration
+
+gcloud info --format='value(config.paths.global_config_dir)' # find where your google cloud configurations settings are stores
+vim /Users/evelynschmidt/.config/gcloud/configurations/config_test # edit 
+```
+
+```
+[core]
+project = test-immuno
+account = evelyn@wustl.edu
+
+[compute]
+zone = us-central1-c
+region = us-central1
+```
+
+
 ### Set up cloud service account, firewall settings, and storage bucket
-Run the following command and make note of the "Service Account" returned (e.g. "cromwell-server@test-immuno.iam.gserviceaccount.com"). Make sure this matches the value in $GCS_SERVICE_ACCOUNT (e.g. `echo $GCS_SERVICE_ACCOUNT`).
+Run the following command and make note of the "Service Account" returned (e.g. "cromwell-server@test-immuno.iam.gserviceaccount.com"). Make sure this matches the value in $GCS_SERVICE_ACCOUNT (e.g. `echo $GCS_SERVICE_ACCOUNT`). If the project already exsists you will see errors but as long as the Service Account is returned then everything has executed correclty 
 
 ```bash
 cd $WORKING_BASE/git/cloud-workflows/manual-workflows/
-bash resources.sh init-project --project $GCS_PROJECT --bucket $GCS_BUCKET_NAME
+bash resources.sh init-project --project $GCS_PROJECT --bucket $GCS_BUCKET_NAME # might have to specify ip addresses depending on google cloud bucket permissions
 ```
 
 This step should have created two new configuration files in your current directory: `cromwell.conf` and `workflow_options.json`.
