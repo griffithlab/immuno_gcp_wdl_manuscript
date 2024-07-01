@@ -1,14 +1,15 @@
 # Manual Review README
 
-After the ITB tumor board review all candidates will be evaluated as Accept, Reject, or Review. The candidates marked as Accept and Review will be reviewed in two separate contexts, pVACview and IGV, to verify that they are good neoantigen candidates. 
+The Immunotherapy Tumor Board (ITB) reviews all candidates and evaluates them as Accept, Reject, or Review. The candidates marked as Accept and Review will be reviewed in this 'Manual Review' section in two separate contexts, pVACview and IGV, to verify that they are good neoantigen candidates. 
 
-During the manual review process we primarily will use two files: the Annotated Neoantigen Candidates excel sheet produced from the ITB review and the Peptides 51mer sheet which will will generated. 
+During the manual review process, we will primarily use two files: the Annotated Neoantigen Candidates excel sheet produced from the ITB review and the Peptides 51mer sheet which we will generate below. 
+The Peptides 51mer sheet is generated in a certain format specified by the peptide manufacturer used for the neoantigen vaccine trials.
 
-To generate the Peptides 51mer excel sheet there is two steps: generating the protein fasta and then generating the manual review files.
+To generate the Peptides 51mer excel sheet there are two steps: (1) generating the protein fasta and (2) generating the manual review files.
 
 ## Generate Protein Fasta
 
-First, we will generate an annotated fasta file using a tool which will extract protein sequences surrounding the variant. We will generate one fasta with just the accept and review candidates and another with all proposed candidates. We do this because in somes cases the top candidate may not be the best one (e.g. a different transcript is found to be better during review) so we generate the unfiltered result so that one can consider alternatives.
+First, we will generate an annotated fasta file using a tool that will extract protein sequences surrounding the variant. We will generate one fasta file with just the 'accept' and 'review' candidates and another with all proposed candidates. We do this because in some cases, the top candidate may not be the best one (e.g. a different transcript is found to be better during manual review) so we generate the unfiltered result so that one can consider alternatives.
 
 ```bash
 gzcat $WORKING_BASE/final_results/annotated.expression.vcf.gz | less
@@ -39,7 +40,7 @@ pvacseq generate_protein_fasta \
 exit
 ```
 
-Once the peptide fastas have been created we can generate out two final review files using some helper scripts. 
+Once the peptide fastas have been created we can generate two final review files using some helper scripts. 
 
 ## Generate the Peptide order form
 
@@ -94,7 +95,7 @@ Mutation on the left exon and germline variant on the right exon.
 A -> C heterozygous germline variant results in Gln (Q - CAA) becoming  Pro (P - CCA)
 ![5120-28 MST1R germline variant AA sequence](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/9390daaa-9890-4863-821f-b44791c001cc)
 
-The variant happens in phase with the germline variant only some of the time.
+The variant happens in phase with the germline variant only some of the times.
 
 
 A really detailed description on exploring a germline varaint in 5120-18
@@ -113,7 +114,11 @@ Leidos 5120-19 - RNA counts were corrected for two single base insertions showin
 
 ### Dunicleotide Variant
 
-5120-16: AASDH (V140L): there is a true dinucleotide variant that is captured separately and therefore this one should be rejected since it only addresses one incorrectly. 
+5120-16: AASDH (V140L): there is a true dinucleotide variant that is captured separately and therefore this one should be rejected since it only addresses one incorrectly.
+
+### Complex Variant
+(TODO: need to check if we can include this as an example)
+MCDB044: MAP2: There is a DNP adjacent to and in phase with a 28-base deletion. Manually looked at the wild-type sequence, and all mutations and translated the sequence to predict the appropriate peptide sequence that should be incorporated in the design.  
 
 ### transcript not expressed
 5120-17: ADPRHL1 - was removed from consideration - the expressed transcript does not contain the mutation
