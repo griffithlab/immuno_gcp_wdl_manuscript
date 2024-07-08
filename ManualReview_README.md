@@ -66,7 +66,7 @@ Maybe some screenshots of these spreadsheets.
 - running the qc scripts?
       - the qc cutoffs
 - end bias examples
-![5120-30 end-bias horseshoe GOOD]https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/2cea9675-5f30-45a2-b6ad-8afe458c7099)
+![5120-30 end-bias horseshoe GOOD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/2cea9675-5f30-45a2-b6ad-8afe458c7099)
 
 ## Reviewing HLA alleles
 
