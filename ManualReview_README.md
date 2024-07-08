@@ -123,6 +123,16 @@ MCDB044: MAP2: There is a DNP adjacent to and in phase with a 28-base deletion. 
 ### transcript not expressed
 5120-17: ADPRHL1 - was removed from consideration - the expressed transcript does not contain the mutation
 
+### Multiple Transcripts expressed
+
+#### JLF-100-040_mcdb046
+The CDKN2A gene has two supporting transcripts with slightly different 51-mer sequences so we have two transcripts in the final protein fasta list. Note that the 51-mer sheet does not include a classII sequence nor a candidate classII HLA allele for the transcript ENST00000579755.2 (those information are available for the best classII transcript which happens to be the other selected one).
+	
+BAZ2B also has two supporting transcripts. 
+
+#### JLF-100-039_mcdb045 
+The FAM76A has an unusual transcript that expresses the peptide in the intronic region and the used transcripts are not that one. 
+
 ### Reference Match KRAS G12R candidate
 
 5120-06
@@ -156,7 +166,25 @@ CKVVGARGVGKSA RHOT2 sequence based on reference
 LVVVGARGVGK   (911 nM) 11-mer KRAS G12R candidate
 CKVVGACGVGKSA RHOT2 sequence based on reference but with homozygous SNP applied
 
+### Alterations to best peptide that needs reanalysis of binding
 
+#### JLF-100-039_mcdb045
+The SLC9A6 on the other hand has a downstream missense variant (almost 4 bases away) that alters the expected best peptide, thus we do not have information of binding affinity, etc. for what would be the best new peptide. This candidate could potentially be rescued with additional effort if needed.
+
+### Fusions
+#### JLF-100-037_mcdb041-original
+Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
+
+The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
+
+#### JLF-100-037_mcdb041-new
+Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
+
+The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
+
+We also examined a fusion prediction for ZNF92::TDRD9 which had 44 junctions reads of support and looks real by manual review in fusion inspector and IGV. However this fusion is predicted to join the first exon of ZNF92 onto the second exon of TDRD9 and this is predicted to lead to an almost immediate stop codon.  The overall ORF would only be 10 AA or so and this is unlikely to be translated.
+
+We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction reads and 2 spanning reads of support.  It is predicted to lead to an almost immediate stop codon.  The neoORF segment would be: MLFHGCLS.  This truncation would be a drastic shortening of the normal KMT2C protein.  The only thing that is predicted to be a good binder is: MSHGVPMLF.  In other words only incorporating the first 3 AA of the novel sequencing arising from the fusion.  This is probably not worth targeting. 
 
 ## pvacview screenshots -- different examples from different datasets
 #### Leidos 5120-29 
