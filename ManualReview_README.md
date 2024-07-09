@@ -113,13 +113,34 @@ We also examined a fusion prediction for ZNF92::TDRD9 which had 44 junctions rea
 
 We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction reads and 2 spanning reads of support.  It is predicted to lead to an almost immediate stop codon.  The neoORF segment would be: MLFHGCLS.  This truncation would be a drastic shortening of the normal KMT2C protein.  The only thing that is predicted to be a good binder is: MSHGVPMLF.  In other words only incorporating the first 3 AA of the novel sequencing arising from the fusion.  This is probably not worth targeting.
 
-
 ### HLA Allele Review
+Make sure the HLA alleles as being used in pVACview for the final selection of candidate match up with those expected for the case based on Optitype/PHLAT predictions from the data and clinical HLA typing results if available. Check whether the HLA alleles predicted for normal and tumor samples are in agreement.  Note any discrepancies.
 
+Check the files in the location `gcp_immuno/final_results/hla_typing`. Make sure optitype_tumor_result.tsv and opitype_normal_result.tsv are the same, phlat_normal_HLA.sum and phlat_tumor_HLA.sum are the same. And all these calls match hla_calls.txt.
 
+### Open case in pVACview
 
+Take a look at the case in pVACview to make notes of anything that seems abnormal. Note how many candidates there are to review, the driving variants, framshift mutations, overall VAF/allele expression.
 
-## Generate Protein Fasta
+## ITB Review
+
+Review the Genomic Review Report and note any concerning qc metrics, interesting candidates, or anything else abnormal about the case. Open pVACview and begin discussing candidates, generally taking note of:
+- is it a good binder
+- does it look well expressed
+- is it a good class II binder?
+- what are any potential probelms? TSL, reference match, problematic bases, etc
+- Is in an anchor? Is it a stronger binder than wildtype?
+- How many algorithms predict it a good binder?
+- Are the elution scores good? (generally less that 1 percentile)
+- Are there mutiple strong binding peptides arising from the variant?
+
+Add comments and mark the evalution accordingly. Make sure to export your comments and evaluations after the ITB review is over. 
+
+## Genomic Manual Review
+
+### Genomic Manual Review Setup
+
+#### Generate Protein Fasta
 
 First, we will generate an annotated fasta file using a tool that will extract protein sequences surrounding the variant. We will generate one fasta file with just the 'accept' and 'review' candidates and another with all proposed candidates. We do this because in some cases, the top candidate may not be the best one (e.g. a different transcript is found to be better during manual review) so we generate the unfiltered result so that one can consider alternatives.
 
@@ -154,8 +175,7 @@ exit
 
 Once the peptide fastas have been created we can generate two final review files using some helper scripts. 
 
-## Generate the Peptide order form
-
+#### Generate the Peptide order form
 ```
 export PATIENT_ID="hcc1395"
 
@@ -174,11 +194,7 @@ Open colored_peptides51mer.html and copy the table into an excel spreadsheet. Th
 
 Maybe some screenshots of these spreadsheets.
 
-
-## Reviewing HLA alleles
-- how to rerun to make sure its the right allels
-- 
-## pVACview Review
+### pVACview Review
 
 Binding algorithm support, anchor position
 Variants compared to CLE pipeline
@@ -188,9 +204,28 @@ Proximal variants review (also look for germline variants, neoantigen candidate 
 RNAseq allele review
 Transcript isoform review
 
+##### Leidos 5120-29 
+SLC1A7 candidate (original status: Review) was dropped during the manual review. Short explanation: the Class I peptide which doesnt have reference match has bad binding affinity, Class II peptide has reference match. Long explanation: This candidate has 2 transcript sets (ENST00000620347.5 and ENST00000371494.9) , both transcript sets have a matched portion (LQALLIVL) with proteome reference. Class II peptide (QALLIVLATSSSSA, from ENST00000371494.9) has a complete overlap with the reference, thus was rejected. Class I peptide for HLA-C*03:04 (VLATSSSSATL, from ENST00000371494.9) can still be used (if we cut the 51 mer to exclude the reference match portion), however this peptide is a bad binder (median IC50 greater than 2,000 nM, with multiple algorithms reports high IC50). Class I peptide for HLA-A (ILQALLIVL from ENST00000620347.5) has good binding affinity but has a strong reference match.  
 
+#####  Assessing Read quality
 
-## IGV screenshot examples -- different examples from different datasets
+the high duplication rate appeared to create situations where all variant support came from a set of identical/duplicate read alignments
+![JLF-100-060 SLF2 variant high duplication rate](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/e5baa217-3cb0-4b4f-9ea4-f21dedee0133)
+
+#####  Further examples:
+https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html
+
+#####  General comment structure
+
+When beginning review I used this general comment structure to make sure I was paying attention to the correct aspects.
+
+1. Binding affinity for classI and %ile look good/ ClassII binding affinity and %ile
+2. DNA, RNA VAFs and allele expression
+3. Anchor position
+4. Algorithm and elution 
+5. Note anything else strange
+   
+### IGV Review
 
 ![JLF-100-066 – Insertion misalignment - DSTN](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7a81f397-56e0-410b-857e-14985be0f9eb)
 
@@ -279,19 +314,15 @@ CKVVGACGVGKSA RHOT2 sequence based on reference but with homozygous SNP applied
 #### JLF-100-039_mcdb045
 The SLC9A6 on the other hand has a downstream missense variant (almost 4 bases away) that alters the expected best peptide, thus we do not have information of binding affinity, etc. for what would be the best new peptide. This candidate could potentially be rescued with additional effort if needed.
 
- 
+ #####  General comment structure
 
-## pvacview screenshots -- different examples from different datasets
-#### Leidos 5120-29 
-SLC1A7 candidate (original status: Review) was dropped during the manual review. Short explanation: the Class I peptide which doesnt have reference match has bad binding affinity, Class II peptide has reference match. Long explanation: This candidate has 2 transcript sets (ENST00000620347.5 and ENST00000371494.9) , both transcript sets have a matched portion (LQALLIVL) with proteome reference. Class II peptide (QALLIVLATSSSSA, from ENST00000371494.9) has a complete overlap with the reference, thus was rejected. Class I peptide for HLA-C*03:04 (VLATSSSSATL, from ENST00000371494.9) can still be used (if we cut the 51 mer to exclude the reference match portion), however this peptide is a bad binder (median IC50 greater than 2,000 nM, with multiple algorithms reports high IC50). Class I peptide for HLA-A (ILQALLIVL from ENST00000620347.5) has good binding affinity but has a strong reference match.  
+When beginning review I used this general comment structure to make sure I was paying attention to the correct aspects.
 
-
-## Assessing Read quality
-
-the high duplication rate appeared to create situations where all variant support came from a set of identical/duplicate read alignments
-![JLF-100-060 SLF2 variant high duplication rate](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/e5baa217-3cb0-4b4f-9ea4-f21dedee0133)
+1. Somatic variant looks real (support in both RNA and DNA)
+2. DNA, RNA VAFs and allele expression
+3. Anchor position
+4. Algorithm and elution 
+5. Note anything else strange
 
 
-Further examples:
-https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html
 
