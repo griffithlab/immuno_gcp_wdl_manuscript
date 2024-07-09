@@ -7,6 +7,52 @@ The Peptides 51mer sheet is generated in a certain format specified by the pepti
 
 To generate the Peptides 51mer excel sheet there are two steps: (1) generating the protein fasta and (2) generating the manual review files.
 
+## Reviewing QC data
+
+Pull the basic data qc from various files. This script will output a file final_results/qc_file.txt and also print the summary to to screen.
+
+```bash
+mkdir $WORKING_BASE/../manual_review
+
+docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts:latest /bin/bash
+
+cd $WORKING_BASE/../manual_review
+
+python3 /opt/scripts/get_neoantigen_qc.py -WB $WORKING_BASE -f final_results --yaml $WORKING_BASE/yamls/$CLOUD_YAML
+
+python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
+```
+### QC Outputs
+
+An example of the QC output for Leidos case 5120-28. 
+
+```
+normal_dna_aligned_metrics.txt Unique Map Reads: 127710879
+tumor_dna_aligned_metrics.txt Unique Map Reads: 410964296
+tumor_rna_aligned_metrics.txt Unique Map Reads: 152389867
+normal_dna_aligned_metrics.txt Mapped Read Duplication Rate: 23.5858414215251 (%)
+tumor_dna_aligned_metrics.txt Mapped Read Duplication Rate: 23.8919559414175 (%)
+relatedness: 0.994
+normal.VerifyBamId.selfSMcontaimination: 0.00046
+tumor.VerifyBamId.selfSMcontaimination: 0.00150
+The proportion of RNA reads mapping to cDNA sequence is 0.9685400000000001 (coding (0.890379) + UTR (0.078161)
+trimmed_read_1strandness_check.txt: Data is likely RF/fr-firststrand
+YAML file: immuno.strand: first
+Total Number of somatic variants called: 36
+REMEMBER to visually inspect end bias plot (usually found in qc/tumor_rna/rna_metrics.pdf)
+```
+
+### FDA Thresholds 
+
+![FDA Quality Thresholds for Leidos-5120-28](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/0850f4d8-192f-4295-8d05-0a9907006ded)
+
+
+- running the qc scripts?
+      - the qc cutoffs
+- end bias examples
+![5120-30 end-bias horseshoe GOOD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/2cea9675-5f30-45a2-b6ad-8afe458c7099)
+
+
 ## Generate Protein Fasta
 
 First, we will generate an annotated fasta file using a tool that will extract protein sequences surrounding the variant. We will generate one fasta file with just the 'accept' and 'review' candidates and another with all proposed candidates. We do this because in some cases, the top candidate may not be the best one (e.g. a different transcript is found to be better during manual review) so we generate the unfiltered result so that one can consider alternatives.
@@ -62,14 +108,10 @@ Open colored_peptides51mer.html and copy the table into an excel spreadsheet. Th
 
 Maybe some screenshots of these spreadsheets.
 
-## Reviewing QC data
-- running the qc scripts?
-      - the qc cutoffs
-- end bias examples
-![5120-30 end-bias horseshoe GOOD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/2cea9675-5f30-45a2-b6ad-8afe458c7099)
 
 ## Reviewing HLA alleles
-
+- how to rerun to make sure its the right allels
+- 
 ## pVACview Review
 
 Binding algorithm support, anchor position
