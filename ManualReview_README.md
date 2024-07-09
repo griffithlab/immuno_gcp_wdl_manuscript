@@ -66,59 +66,27 @@ trimmed_read_1strandness_check.txt: Data is likely RF/fr-firststrand
 YAML file: immuno.strand: first
 Total Number of somatic variants called: 67
 ```
-
 #### The strand settings
 A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting tge strand setting in the yaml to unstranded is safest because it essentially does not considered the directionality of the reads during mapping. However, this does result in a lost of information. If you set your yaml to first strand when the protocol is actually second or unstranded, you could protentially lose whole genes depending on overlap...
 
 **how to manually infer strandedness**
+
+#### End Bias
+
+Visually inspect the plot located at `qc/tumor_rna/rna_metrics.pdf`. If the RNA-seq data is of good quality from intact RNA the plot should have a “horse back” shape, representing lower coverage at the beginning and end of transcripts but quickly rising and remaining relatively high over the majority of the transcript positions. RNA-seq data made from highly degraded RNA combined with polyA selection or oligo-dT cDNA priming can have a heavily biased distribution instead. Such data can still produce gene expression estimates but will be unable to effectively verify expression of somatic variant alleles.
+
+An example of a good end bias plot:
+![5120-30 end-bias horseshoe GOOD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/2cea9675-5f30-45a2-b6ad-8afe458c7099)
+
+An example of a poor end-bias plot. This case was run with the yaml set to "unstranded" when the detected strandedness of the RNA data was unstranded. **is this the reson of this plot???**
+![jlf-100-067 end-bias BAD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/649f9477-2d85-450c-8257-282c3be60abf)
+
 
 ### Fusion Review
 
 ### HLA Allele Review
 
 
-## Reviewing QC data
-
-
-```bash
-mkdir $WORKING_BASE/../manual_review
-
-docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts:latest /bin/bash
-
-cd $WORKING_BASE/../manual_review
-
-python3 /opt/scripts/get_neoantigen_qc.py -WB $WORKING_BASE -f final_results --yaml $WORKING_BASE/yamls/$CLOUD_YAML
-
-python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
-```
-### QC Outputs
-
-An example of the QC output for Leidos case 5120-28. 
-
-```
-normal_dna_aligned_metrics.txt Unique Map Reads: 127710879
-tumor_dna_aligned_metrics.txt Unique Map Reads: 410964296
-tumor_rna_aligned_metrics.txt Unique Map Reads: 152389867
-normal_dna_aligned_metrics.txt Mapped Read Duplication Rate: 23.5858414215251 (%)
-tumor_dna_aligned_metrics.txt Mapped Read Duplication Rate: 23.8919559414175 (%)
-relatedness: 0.994
-normal.VerifyBamId.selfSMcontaimination: 0.00046
-tumor.VerifyBamId.selfSMcontaimination: 0.00150
-The proportion of RNA reads mapping to cDNA sequence is 0.9685400000000001 (coding (0.890379) + UTR (0.078161)
-trimmed_read_1strandness_check.txt: Data is likely RF/fr-firststrand
-YAML file: immuno.strand: first
-Total Number of somatic variants called: 36
-REMEMBER to visually inspect end bias plot (usually found in qc/tumor_rna/rna_metrics.pdf)
-```
-
-### FDA Thresholds 
-
-
-
-- running the qc scripts?
-      - the qc cutoffs
-- end bias examples
-![5120-30 end-bias horseshoe GOOD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/2cea9675-5f30-45a2-b6ad-8afe458c7099)
 
 
 ## Generate Protein Fasta
