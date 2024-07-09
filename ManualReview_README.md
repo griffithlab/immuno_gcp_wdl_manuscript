@@ -84,6 +84,15 @@ An example of a poor end-bias plot. This case was run with the yaml set to "unst
 
 ### Fusion Review
 
+open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion with be one with more than 10 reads. Then we check to see if there are different left/right genes and different left right chromosomes. Most of them are going to genes tthat are next to each other and its actually read through rather than a real fusion. 
+
+![fusion_table JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/33f699ac-a555-4569-ac01-9797421a3f53)
+
+The very first row is the only possible cnadidate with a lot of juctions reads but its not spanning different chromosomes. This is an exmaple of a rad through:
+![fusion_read_through JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/cccd3c1a-41dd-4c28-9d40-0c9389fd72aa)
+
+
+
 ### HLA Allele Review
 
 
