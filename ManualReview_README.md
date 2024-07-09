@@ -34,10 +34,51 @@ This is an example of a case that suffered from low input tumor material resulti
 
 ![FDA Quality Thresholds for JLF-100-060](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7fd55b36-586c-4882-b00e-cab71b8ea94a)
 
+### Basic QC data review
+
+Using similar steps from above we will also examine other basic QC data that we find most useful in evaluating the case.
+
+```bash
+mkdir $WORKING_BASE/../manual_review
+
+docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts:latest /bin/bash
+
+cd $WORKING_BASE/../manual_review
+
+python3 /opt/scripts/get_neoantigen_qc.py -WB $WORKING_BASE -f final_results --yaml $WORKING_BASE/yamls/$CLOUD_YAML
+```
+
+We have created more concrete thresholds of evaluation for these metrics. 
+
+Here is an example (case 5120-18) of a typical qc summary:
+
+```
+normal_dna_aligned_metrics.txt Unique Map Reads: 136,917,036 ( excellent )
+tumor_dna_aligned_metrics.txt Unique Map Reads: 347,318,833 ( excellent )
+tumor_rna_aligned_metrics.txt Unique Map Reads: 183,279,500 ( excellent )
+normal_dna_aligned_metrics.txt Mapped Read Duplication Rate: 12.7410677726806 (%) ( very poor )
+tumor_dna_aligned_metrics.txt Mapped Read Duplication Rate: 13.2917990956679 (%) ( very poor )
+Relatedness: 0.994 ( excellent )
+normal.VerifyBamId.selfSM Contamination: 0.00138 ( good )
+tumor.VerifyBamId.selfSM Contamination: 0.00281 ( good )
+The proportion of RNA reads mapping to cDNA sequence is 0.970317 (coding ( 0.896512 ) + UTR ( 0.073805 ) ( excellent )
+trimmed_read_1strandness_check.txt: Data is likely RF/fr-firststrand
+YAML file: immuno.strand: first
+Total Number of somatic variants called: 67
+```
+
+#### The strand settings
+A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting tge strand setting in the yaml to unstranded is safest because it essentially does not considered the directionality of the reads during mapping. However, this does result in a lost of information. If you set your yaml to first strand when the protocol is actually second or unstranded, you could protentially lose whole genes depending on overlap...
+
+**how to manually infer strandedness**
+
+### Fusion Review
+
+### HLA Allele Review
+
 
 ## Reviewing QC data
 
-Pull the basic data qc from various files. This script will output a file final_results/qc_file.txt and also print the summary to to screen.
 
 ```bash
 mkdir $WORKING_BASE/../manual_review
