@@ -2,10 +2,38 @@
 
 The Immunotherapy Tumor Board (ITB) reviews all candidates and evaluates them as Accept, Reject, or Review. The candidates marked as Accept and Review will be reviewed in this 'Manual Review' section in two separate contexts, pVACview and IGV, to verify that they are good neoantigen candidates. 
 
-During the manual review process, we will primarily use two files: the Annotated Neoantigen Candidates excel sheet produced from the ITB review and the Peptides 51mer sheet which we will generate below. 
+During the manual review process, we will primarily use two files: the Annotated Neoantigen Candidates excel sheet which is the classI produced from the ITB review and the Peptides 51mer sheet which we will generate below. 
 The Peptides 51mer sheet is generated in a certain format specified by the peptide manufacturer used for the neoantigen vaccine trials.
 
 To generate the Peptides 51mer excel sheet there are two steps: (1) generating the protein fasta and (2) generating the manual review files.
+
+## Preparing for ITB Review
+
+After the pipeline run has been completed, we can verify that the outputs look normal and begin creating a summary of the pipeline to be presented at the ITB Review meeting where a panel of experts will review the predicted neoantigens. These meetings usually are about a 30 minutes to an hour per case so it is useful to create a case summary which we call a Genomics Review Report to orient everyone to the case. Some suggested information to include at the top of the report would be: an introduction to the case including things like cancer type, past treatments, any anynomallies and a list/links to the most important files used for this case (namely the IGV and pvacview files) .
+
+### FDA Thresholds
+
+Griffith lab discussions with the FDA have resulted in the creation of a set of values which set a very high standard of data quality. These metrics are pulled from several different files and then summarized in a table using the commands below:
+
+```bash
+mkdir $WORKING_BASE/../manual_review
+
+docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts:latest /bin/bash
+
+cd $WORKING_BASE/../manual_review
+
+python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
+```
+
+This is an example of how this data table should look for a very high data quality case. Note that the read total reads often fail because the threshold is set at a very high level.
+
+![FDA Quality Thresholds for Leidos-5120-28](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/0850f4d8-192f-4295-8d05-0a9907006ded)
+
+
+This is an example of a case that suffered from low input tumor material resulting in tumor DNA coverage being deficient and uneven and suffering from a very high duplication rate. This likely contributed to an overall high false-positive rate with many variants not surviving basic filtering or manual review. Tumor RNA similarly suffered from an apparent high level of genomic contamination. As a result, several prioritized neoantigen candidates failed after dedicated IGV manual review, and the high duplication rate created situations where all variant support came from a set of identical/duplicate read alignments. 
+
+![FDA Quality Thresholds for JLF-100-060](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7fd55b36-586c-4882-b00e-cab71b8ea94a)
+
 
 ## Reviewing QC data
 
@@ -44,7 +72,6 @@ REMEMBER to visually inspect end bias plot (usually found in qc/tumor_rna/rna_me
 
 ### FDA Thresholds 
 
-![FDA Quality Thresholds for Leidos-5120-28](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/0850f4d8-192f-4295-8d05-0a9907006ded)
 
 
 - running the qc scripts?
@@ -230,7 +257,14 @@ We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction read
 
 ## pvacview screenshots -- different examples from different datasets
 #### Leidos 5120-29 
-SLC1A7 candidate (original status: Review) was dropped during the manual review. Short explanation: the Class I peptide which doesnt have reference match has bad binding affinity, Class II peptide has reference match. Long explanation: This candidate has 2 transcript sets (ENST00000620347.5 and ENST00000371494.9) , both transcript sets have a matched portion (LQALLIVL) with proteome reference. Class II peptide (QALLIVLATSSSSA, from ENST00000371494.9) has a complete overlap with the reference, thus was rejected. Class I peptide for HLA-C*03:04 (VLATSSSSATL, from ENST00000371494.9) can still be used (if we cut the 51 mer to exclude the reference match portion), however this peptide is a bad binder (median IC50 greater than 2,000 nM, with multiple algorithms reports high IC50). Class I peptide for HLA-A (ILQALLIVL from ENST00000620347.5) has good binding affinity but has a strong reference match.   
+SLC1A7 candidate (original status: Review) was dropped during the manual review. Short explanation: the Class I peptide which doesnt have reference match has bad binding affinity, Class II peptide has reference match. Long explanation: This candidate has 2 transcript sets (ENST00000620347.5 and ENST00000371494.9) , both transcript sets have a matched portion (LQALLIVL) with proteome reference. Class II peptide (QALLIVLATSSSSA, from ENST00000371494.9) has a complete overlap with the reference, thus was rejected. Class I peptide for HLA-C*03:04 (VLATSSSSATL, from ENST00000371494.9) can still be used (if we cut the 51 mer to exclude the reference match portion), however this peptide is a bad binder (median IC50 greater than 2,000 nM, with multiple algorithms reports high IC50). Class I peptide for HLA-A (ILQALLIVL from ENST00000620347.5) has good binding affinity but has a strong reference match.  
+
+
+## Assessing Read quality
+
+the high duplication rate appeared to create situations where all variant support came from a set of identical/duplicate read alignments
+![JLF-100-060 SLF2 variant high duplication rate](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/e5baa217-3cb0-4b4f-9ea4-f21dedee0133)
+
 
 Further examples:
 https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html
