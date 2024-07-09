@@ -84,13 +84,34 @@ An example of a poor end-bias plot. This case was run with the yaml set to "unst
 
 ### Fusion Review
 
-open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion with be one with more than 10 reads. Then we check to see if there are different left/right genes and different left right chromosomes. Most of them are going to genes tthat are next to each other and its actually read through rather than a real fusion. 
+open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion with be one with more than 10 reads. Then we check to see if there are different left/right genes and different left-right chromosomes. Most of them are going to genes that are next to each other and its actually read through rather than a real fusion. 
 
 ![fusion_table JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/33f699ac-a555-4569-ac01-9797421a3f53)
 
-The very first row is the only possible cnadidate with a lot of juctions reads but its not spanning different chromosomes. This is an exmaple of a rad through:
+The very first row is the only possible candidate with a lot of junctions reads but its not spanning different chromosomes. This is an example of a rad through:
 ![fusion_read_through JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/cccd3c1a-41dd-4c28-9d40-0c9389fd72aa)
 
+This example shows a possible frameshift in the first row, it has a ton of reads and fragments and is between two different chromosomes and genes.
+![fusion table real jlf-100-056](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/c6e41e09-bd7a-4cf3-8228-3e7b3b45f0cd)
+
+This is a real fusion, we see lots of spanning reads which are bringing the middle of the two genes together. 
+![fusion_real jlf-100-056](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/3ddf57a4-2342-4750-91b4-9a8872e212d7)
+
+**what do you do next? -- test for binding?? Run pvacfuse??**
+
+#### JLF-100-037_mcdb041-original
+Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
+
+The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
+
+#### JLF-100-037_mcdb041-new
+Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
+
+The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
+
+We also examined a fusion prediction for ZNF92::TDRD9 which had 44 junctions reads of support and looks real by manual review in fusion inspector and IGV. However this fusion is predicted to join the first exon of ZNF92 onto the second exon of TDRD9 and this is predicted to lead to an almost immediate stop codon.  The overall ORF would only be 10 AA or so and this is unlikely to be translated.
+
+We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction reads and 2 spanning reads of support.  It is predicted to lead to an almost immediate stop codon.  The neoORF segment would be: MLFHGCLS.  This truncation would be a drastic shortening of the normal KMT2C protein.  The only thing that is predicted to be a good binder is: MSHGVPMLF.  In other words only incorporating the first 3 AA of the novel sequencing arising from the fusion.  This is probably not worth targeting.
 
 
 ### HLA Allele Review
@@ -258,20 +279,7 @@ CKVVGACGVGKSA RHOT2 sequence based on reference but with homozygous SNP applied
 #### JLF-100-039_mcdb045
 The SLC9A6 on the other hand has a downstream missense variant (almost 4 bases away) that alters the expected best peptide, thus we do not have information of binding affinity, etc. for what would be the best new peptide. This candidate could potentially be rescued with additional effort if needed.
 
-### Fusions
-#### JLF-100-037_mcdb041-original
-Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
-
-The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
-
-#### JLF-100-037_mcdb041-new
-Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
-
-The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
-
-We also examined a fusion prediction for ZNF92::TDRD9 which had 44 junctions reads of support and looks real by manual review in fusion inspector and IGV. However this fusion is predicted to join the first exon of ZNF92 onto the second exon of TDRD9 and this is predicted to lead to an almost immediate stop codon.  The overall ORF would only be 10 AA or so and this is unlikely to be translated.
-
-We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction reads and 2 spanning reads of support.  It is predicted to lead to an almost immediate stop codon.  The neoORF segment would be: MLFHGCLS.  This truncation would be a drastic shortening of the normal KMT2C protein.  The only thing that is predicted to be a good binder is: MSHGVPMLF.  In other words only incorporating the first 3 AA of the novel sequencing arising from the fusion.  This is probably not worth targeting. 
+ 
 
 ## pvacview screenshots -- different examples from different datasets
 #### Leidos 5120-29 
