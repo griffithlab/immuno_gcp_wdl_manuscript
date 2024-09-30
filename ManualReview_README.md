@@ -2,10 +2,10 @@
 
 The Immunotherapy Tumor Board (ITB) reviews all candidates and evaluates them as Accept, Reject, or Review. The candidates marked as Accept and Review will be reviewed in this 'Manual Review' section in two separate contexts, pVACview and IGV, to verify that they are good neoantigen candidates. 
 
-During the manual review process, we will primarily use two files: the Annotated Neoantigen Candidates excel sheet which is the classI produced from the ITB review and the Peptides 51mer sheet which we will generate below. 
+During the manual review process, we will primarily use two files: the Annotated Neoantigen Candidates Excel sheet, the classI produced from the ITB review, and the Peptides 51mer sheet, which we will generate below. 
 The Peptides 51mer sheet is generated in a certain format specified by the peptide manufacturer used for the neoantigen vaccine trials.
 
-To generate the Peptides 51mer excel sheet there are two steps: (1) generating the protein fasta and (2) generating the manual review files.
+To generate the Peptides 51mer Excel sheet there are two steps: (1) generating the protein fasta and (2) generating the manual review files.
 
 ## Preparing for ITB Review
 
@@ -13,7 +13,7 @@ After the pipeline run has been completed, we can verify that the outputs look n
 
 ### FDA Thresholds
 
-Griffith lab discussions with the FDA have resulted in the creation of a set of values which set a very high standard of data quality. These metrics are pulled from several different files and then summarized in a table using the commands below:
+Griffith lab discussions with the FDA have resulted in the creation of a set of values that set a very high standard of data quality. These metrics are pulled from several different files and then summarized in a table using the commands below:
 
 ```bash
 mkdir $WORKING_BASE/../manual_review
@@ -25,12 +25,12 @@ cd $WORKING_BASE/../manual_review
 python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
 ```
 
-This is an example of how this data table should look for a very high data quality case. Note that the read total reads often fail because the threshold is set at a very high level.
+This is an example of how this data table should look for a very high data quality case. Note that the total reads often fail because the threshold is set at a very high level.
 
 ![FDA Quality Thresholds for Leidos-5120-28](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/0850f4d8-192f-4295-8d05-0a9907006ded)
 
 
-This is an example of a case that suffered from low input tumor material resulting in tumor DNA coverage being deficient and uneven and suffering from a very high duplication rate. This likely contributed to an overall high false-positive rate with many variants not surviving basic filtering or manual review. Tumor RNA similarly suffered from an apparent high level of genomic contamination. As a result, several prioritized neoantigen candidates failed after dedicated IGV manual review, and the high duplication rate created situations where all variant support came from a set of identical/duplicate read alignments. 
+This is an example of a case that suffered from low input tumor material resulting in tumor DNA coverage being deficient and uneven and suffering from a very high duplication rate. This likely contributed to a high false-positive rate with many variants not surviving basic filtering or manual review. Tumor RNA similarly suffered from an apparent high level of genomic contamination. As a result, several prioritized neoantigen candidates failed after dedicated IGV manual review, and the high duplication rate created situations where all variant support came from a set of identical/duplicate read alignments. 
 
 ![FDA Quality Thresholds for JLF-100-060](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7fd55b36-586c-4882-b00e-cab71b8ea94a)
 
@@ -67,13 +67,13 @@ YAML file: immuno.strand: first
 Total Number of somatic variants called: 67
 ```
 #### The strand settings
-A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting tge strand setting in the yaml to unstranded is safest because it essentially does not considered the directionality of the reads during mapping. However, this does result in a lost of information. If you set your yaml to first strand when the protocol is actually second or unstranded, you could protentially lose whole genes depending on overlap...
+A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol, we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting the strand setting in the yaml to unstranded is safest because it essentially does not consider the directionality of the reads during mapping. However, this does result in a loss of information. If you set your yaml to first strand when the protocol is second or unstranded, you could potentially lose whole genes depending on overlap...
 
 **how to manually infer strandedness**
 
 #### End Bias
 
-Visually inspect the plot located at `qc/tumor_rna/rna_metrics.pdf`. If the RNA-seq data is of good quality from intact RNA the plot should have a “horse back” shape, representing lower coverage at the beginning and end of transcripts but quickly rising and remaining relatively high over the majority of the transcript positions. RNA-seq data made from highly degraded RNA combined with polyA selection or oligo-dT cDNA priming can have a heavily biased distribution instead. Such data can still produce gene expression estimates but will be unable to effectively verify expression of somatic variant alleles.
+Visually inspect the plot located at `qc/tumor_rna/rna_metrics.pdf`. If the RNA-seq data is of good quality from intact RNA the plot should have a “horseback” shape, representing lower coverage at the beginning and end of transcripts but quickly rising and remaining relatively high over the majority of the transcript positions. RNA-seq data made from highly degraded RNA combined with polyA selection or oligo-dT cDNA priming can have a heavily biased distribution instead. Such data can still produce gene expression estimates but will be unable to effectively verify the expression of somatic variant alleles.
 
 An example of a good end bias plot:
 ![5120-30 end-bias horseshoe GOOD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/2cea9675-5f30-45a2-b6ad-8afe458c7099)
@@ -83,12 +83,11 @@ An example of a poor end-bias plot. This case was run with the yaml set to "unst
 
 
 ### Fusion Review
-
-open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion with be one with more than 10 reads. Then we check to see if there are different left/right genes and different left-right chromosomes. Most of them are going to genes that are next to each other and its actually read through rather than a real fusion. 
+Open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion would be one with more than 10 reads. Then we check to see if there are different left/right genes and different left-right chromosomes. Most of them are going to genes that are next to each other and it isread through rather than a real fusion. 
 
 ![fusion_table JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/33f699ac-a555-4569-ac01-9797421a3f53)
 
-The very first row is the only possible candidate with a lot of junctions reads but its not spanning different chromosomes. This is an example of a rad through:
+The very first row is the only possible candidate with a lot of junctions reads but it's not spanning different chromosomes. This is an example of a read through:
 ![fusion_read_through JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/cccd3c1a-41dd-4c28-9d40-0c9389fd72aa)
 
 This example shows a possible frameshift in the first row, it has a ton of reads and fragments and is between two different chromosomes and genes.
@@ -100,21 +99,16 @@ This is a real fusion, we see lots of spanning reads which are bringing the midd
 **what do you do next? -- test for binding?? Run pvacfuse??**
 
 #### JLF-100-037_mcdb041-original
-Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
+Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor. The peptide sequence corresponds to the tumor-specific frameshift sequence created by the fusion event.
 
-The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
-
-#### JLF-100-037_mcdb041-new
-Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor.  The peptide sequence corresponds to the tumor specific frameshift sequence created by the fusion event.
-
-The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific in this case.  It is simply the wild type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
+The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific.  It is simply the wild-type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
 
 We also examined a fusion prediction for ZNF92::TDRD9 which had 44 junctions reads of support and looks real by manual review in fusion inspector and IGV. However this fusion is predicted to join the first exon of ZNF92 onto the second exon of TDRD9 and this is predicted to lead to an almost immediate stop codon.  The overall ORF would only be 10 AA or so and this is unlikely to be translated.
 
 We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction reads and 2 spanning reads of support.  It is predicted to lead to an almost immediate stop codon.  The neoORF segment would be: MLFHGCLS.  This truncation would be a drastic shortening of the normal KMT2C protein.  The only thing that is predicted to be a good binder is: MSHGVPMLF.  In other words only incorporating the first 3 AA of the novel sequencing arising from the fusion.  This is probably not worth targeting.
 
 ### HLA Allele Review
-Make sure the HLA alleles as being used in pVACview for the final selection of candidate match up with those expected for the case based on Optitype/PHLAT predictions from the data and clinical HLA typing results if available. Check whether the HLA alleles predicted for normal and tumor samples are in agreement.  Note any discrepancies.
+Make sure the HLA alleles that are being used in pVACview for the final selection of candidates match up with those expected for the case based on Optitype/PHLAT predictions from the data and clinical HLA typing results if available. Check whether the HLA alleles predicted for normal and tumor samples are in agreement.  Note any discrepancies.
 
 Check the files in the location `gcp_immuno/final_results/hla_typing`. Make sure optitype_tumor_result.tsv and opitype_normal_result.tsv are the same, phlat_normal_HLA.sum and phlat_tumor_HLA.sum are the same. And all these calls match hla_calls.txt.
 
