@@ -7,6 +7,11 @@ The Peptides 51mer sheet is generated in a certain format specified by the pepti
 
 To generate the Peptides 51mer Excel sheet there are two steps: (1) generating the protein fasta and (2) generating the manual review files.
 
+## TODO- NEED TO ADD SOME TROUBLESHOOTING EXAMPLES FOR FAILURES IN THE PIPELINE RUN ITSELF. (mentioning some general ideas here)
+
+1. Most common errors related to user error when generating the YAML file. Check the cloud YAML file after cloudize workflows to make sure that all the file paths are in the google cloud bucket. And also check that all the files got uploaded. Also, check that the sample name in the readgroup is identical to the sample name in the field below.
+2. Cromwell logging is difficult to parse, so there is not a single good way to troubleshoot a run failure. However, a good place to start is looking if there is a message pointing the user to a stderr log file from a step. 
+
 ## Preparing for ITB Review
 
 After the pipeline run has been completed, we can verify that the outputs look normal and begin creating a summary of the pipeline to be presented at the ITB Review meeting where a panel of experts will review the predicted neoantigens. These meetings usually are about a 30 minutes to an hour per case so it is useful to create a case summary which we call a Genomics Review Report to orient everyone to the case. Some suggested information to include at the top of the report would be: an introduction to the case including things like cancer type, past treatments, any anynomallies and a list/links to the most important files used for this case (namely the IGV and pvacview files) .
