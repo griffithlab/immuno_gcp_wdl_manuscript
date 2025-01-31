@@ -1,0 +1,293 @@
+# Preparing References README
+
+There are dozens of input files needed for these pipelines.  These include things like reference genomes, aligner indices, gene annotations, and known variants.   This guide aims to be a comprehensive walkthrough of where to find those files and/or how to create them. Code snippets are included for human, using GRCh38 and Ensembl version 113. 
+
+To create these files yourself, follow the links below, each labelled with key pipelines for which they're needed-
+
+* <abbr title="Alignment"><abbr title="Alignment">![Alignment](img/a_sm.png)</abbr></abbr> - Alignment
+* <abbr title="Germline">![Germline](img/g_sm.png)</abbr> - Germline variant calling
+* <abbr title="Somatic">![Somatic](img/s_sm.png)</abbr> - Somatic variant calling (exome/WGS)
+* <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr> - RNAseq (bulk)
+
+Before running any snippets, make a directory where you'd like this cache to be stored, and set the `BASEDIR` variable to point to it:
+
+```
+#BASEDIR=/path/to/annotation_data_grch38_ens113
+BASEDIR=/storage1/fs1/mgriffit/Active/griffithlab/gc2596/k.singhal/immuno_manuscript/preparing_references/annotation_data_grch38_ens113
+```
+
+## Reference genome 
+#### fasta <abbr title="Alignment">![Alignment](img/a_sm.png)</abbr><abbr title="Germline">![Germline](img/g_sm.png)</abbr><abbr title="Somatic">![Somatic](img/s_sm.png)</abbr><abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+We will use the 1000 genomes version of the human GRCh38 build. This reference includes extra decoy and HLA sequences in addition to the alternate haplotypes provided from the GRC consortium. 
+
+```
+mkdir -p $BASEDIR/reference_genome
+wget -O $BASEDIR/reference_genome/all_sequences.fa https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa
+```
+
+</p>
+</details>
+
+#### fasta index <abbr title="Alignment">![Alignment](img/a_sm.png)</abbr><abbr title="Germline">![Germline](img/g_sm.png)</abbr><abbr title="Somatic">![Somatic](img/s_sm.png)</abbr><abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+From docker image `mgibio/samtools-cwl:1.0.0`
+
+```
+/opt/samtools/bin/samtools faidx $BASEDIR/reference_genome/all_sequences.fa
+```
+
+</p>
+</details>
+
+#### Sequence dictionary <abbr title="Alignment">![Alignment](img/a_sm.png)</abbr><abbr title="Germline">![Germline](img/g_sm.png)</abbr><abbr title="Somatic">![Somatic](img/s_sm.png)</abbr><abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+From docker image `mgibio/picard-cwl:2.18.1`
+
+```
+java -jar /opt/picard/picard.jar CreateSequenceDictionary R=$BASEDIR/reference_genome/all_sequences.fa O=$BASEDIR/reference_genome/all_sequences.dict
+```
+
+</p>
+</details>
+
+## Ensembl/VEP annotation files
+
+#### VEP cache <abbr title="Germline">![Germline](img/g_sm.png)</abbr><abbr title="Somatic">![Somatic](img/s_sm.png)</abbr><abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p>Select the most recent [docker image from your desired ensembl version](https://hub.docker.com/r/ensemblorg/ensembl-vep/tags).  Our current release uses `ensemblorg/ensembl-vep:release_113.3`
+Inside that container, run the following (mount the appropriate volumes if needed):
+
+```
+mkdir $BASEDIR/vep_cache
+/usr/bin/perl /opt/vep/src/ensembl-vep/INSTALL.pl --CACHEDIR $BASEDIR/vep_cache --AUTO cf --SPECIES homo_sapiens --ASSEMBLY GRCh38
+```
+
+If for some reason the desired cache version and docker image version in use do not match, add `--CACHE_VERSION <version>`
+</p>
+</details>
+
+#### Genes/Transcripts GTF <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+
+```
+mkdir -p $BASEDIR/rna_seq_annotation
+cd $BASEDIR/rna_seq_annotation
+wget -O $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf.gz https://ftp.ensembl.org/pub/release-113/gtf/homo_sapiens/Homo_sapiens.GRCh38.113.gtf.gz
+gunzip Homo_sapiens.GRCh38.113.gtf.gz
+```
+
+The reference uses "chr" prefixes (chr1, chr2, chr3), while the Ensembl gtf does not (1, 2, 3), so we need to convert the gtf: 
+
+``` 
+cd $BASEDIR/rna_seq_annotation/
+wget https://raw.githubusercontent.com/chrisamiller/convertEnsemblGTF/master/convertEnsemblGTF.pl
+mv $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf.orig
+perl convertEnsemblGTF.pl $BASEDIR/reference_genome/all_sequences.dict $BASEDIR/vep_cache/homo_sapiens/113_GRCh38/chr_synonyms.txt $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf.orig >$BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf && rm -f $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf.orig 2> convertEnsemblGTF.stdout
+```
+
+</p>
+</details>
+
+#### Transcriptome cDNA reference <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr> 
+<details><summary>human</summary>
+<p>
+Note that we're not going to convert these coordinates from [1,2,3] to [chr1,chr2,chr3], since Kallisto doesn't include coordinates in it's output.  If pseudobams from kallisto are desired, that conversion would need to be done.
+
+```
+wget -O $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz
+```
+
+</p>
+</details>
+
+## Aligner indices 
+
+#### bwa mem index <abbr title="Alignment">![Alignment](img/a_sm.png)</abbr><abbr title="Germline">![Germline](img/g_sm.png)</abbr><abbr title="Somatic">![Somatic](img/s_sm.png)</abbr>
+
+<details><summary>human</summary>
+<p>From docker image: `mgibio/alignment_helper-cwl:1.0.0`
+
+```
+mkdir -p $BASEDIR/aligner_indices/bwamem_0.7.15 
+cd $BASEDIR/aligner_indices/bwamem_0.7.15
+for i in all_sequences.fa all_sequences.fa.fai all_sequences.dict all_sequences.genome;do 
+    ln -s $BASEDIR/reference_genome/$i .
+done
+/usr/local/bin/bwa index all_sequences.fa
+```
+
+</p>
+</details>
+
+#### STAR-fusion index <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p> In the `trinityctat/starfusion` docker container:
+
+```
+mkdir -p $BASEDIR/aligner_indices/star_fusion 
+cd $BASEDIR/aligner_indices/star_fusion
+/usr/local/src/STAR-Fusion/ctat-genome-lib-builder/prep_genome_lib.pl --CPU 10 --genome_fa $BASEDIR/reference_genome/all_sequences.fa --gtf $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf --pfam_db current --dfam_db human --output_dir $BASEDIR/aligner_indices/star_fusion
+```
+
+</p>
+</details>
+
+## Known Variants
+
+#### Known snps and indels <abbr title="Alignment">![Alignment](img/a_sm.png)</abbr><abbr title="Germline">![Germline](img/g_sm.png)</abbr><abbr title="Somatic">![Somatic](img/s_sm.png)</abbr>
+
+<details><summary>human</summary>
+<p>
+dbSNP/indels from the Mills/1000G/etc datasets for use with GATK/Mutect
+from the `google/cloud-sdk` image:
+
+```
+mkdir $BASEDIR/known_variants
+gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf $BASEDIR/known_variants
+gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx $BASEDIR/known_variants
+gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz $BASEDIR/known_variants
+gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi $BASEDIR/known_variants
+gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz $BASEDIR/known_variants
+gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi $BASEDIR/known_variants
+```
+
+</p>
+</details>
+
+#### DoCM cancer variants <abbr title="Somatic">![Somatic](img/s_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+Variants from the [Database of Canonical Mutations](http://docm.info) used for hotspot checking in somatic pipelines
+
+```
+wget -O $BASEDIR/known_variants/docm.vcf.gz https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/raw/refs/heads/main/reference_inputs/docm.vcf.gz
+wget -O $BASEDIR/known_variants/docm.vcf.gz.tbi https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/raw/refs/heads/main/reference_inputs/docm.vcf.gz.tbi
+```
+
+</p>
+</details>
+
+#### Gnomad population frequencies <abbr title="Germline">![Germline](img/g_sm.png)</abbr><abbr title="Somatic">![Somatic](img/s_sm.png)</abbr>
+
+<details><summary>human</summary>
+<p>
+This command downloads the V3 of the genome [Gnomad Database](https://gnomad.broadinstitute.org) which has the allele frequencies from 70k WGS samples aligned to GRCh38. This file is ~236gb.
+
+```
+# TODO FIGURE OUT WHERE WE WANT TO UPLOAD THESE FILES
+wget -O $BASEDIR/known_variants/gnomad.genomes.r3.0.sites.vcf.gz https://storage.googleapis.com/gnomad-public/release/3.0/vcf/genomes/gnomad.genomes.r3.0.sites.vcf.bgz
+wget -O $BASEDIR/known_variants/gnomad.genomes.r3.0.sites.vcf.gz.tbi https://storage.googleapis.com/gnomad-public/release/3.0/vcf/genomes/gnomad.genomes.r3.0.sites.vcf.bgz.tbi
+```
+<p>
+<details><summary>lite version</summary>
+Can create a lite version containing the population allele frequencies from the full vcf using using bcftools. Tested using bcftools version 1.9.
+
+```
+# TODO FIGURE OUT WHERE WE WANT TO UPLOAD THESE FILES
+bcftools annotate -x ^INFO/AF,INFO/AF_afr,INFO/AF_amr,INFO/AF_asj,INFO/AF_eas,INFO/AF_fin,INFO/AF_nfe,INFO/AF_oth,INFO/AF_sas --threads $THREADS --output-type z -o $BASEDIR/known_variants/gnomad-lite.genomes.r3.0.sites.vcf.gz $BASEDIR/known_variants/gnomad.genomes.r3.0.sites.vcf.gz 
+```
+
+</p>
+</details>
+
+</p>
+</details>
+
+#### Common SNPs for somalier concordance <abbr title="Somatic">![Somatic](img/s_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+
+```
+wget -O $BASEDIR/known_variants/somalier_GRCh38.vcf.gz https://github.com/brentp/somalier/files/3412456/sites.hg38.vcf.gz
+```
+
+</p>
+</details>
+
+## Other Transcriptome files
+
+
+#### Kallisto transcriptome index <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+From docker image `mgibio/rnaseq`
+
+```
+kallisto index -i $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.kallisto.idx $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz
+```
+
+</p>
+</details>
+
+#### Kallisto gene translation table <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+
+<details><summary>human</summary>
+<p>
+From docker image `quay.io/biocontainers/bioconductor-biomart:2.42.0--r36_0`
+
+```
+cd $BASEDIR/rna_seq_annotation/
+Rscript -e 'library(biomaRt);mart <- useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="http://jan2019.archive.ensembl.org/");t2g <- getBM(attributes=c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name"), mart=mart);t2g <- t2g[order(t2g$ensembl_gene_id), ]; write.table(t2g,"ensembl113.transcriptToGene.tsv",sep="\t",row.names=F,quote=F)'
+```
+
+</p>
+</details>
+
+#### Refflat genes for QC <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+
+<details><summary>human</summary>
+<p>In docker container: `quay.io/biocontainers/ucsc-gtftogenepred:377--h35c10e6_2`
+
+```
+gtfToGenePred -genePredExt -geneNameAsName2 -ignoreGroupsWithoutExons $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf /dev/stdout | awk 'BEGIN { OFS="\t"} {print $12, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' >$BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.refFlat.txt
+```
+
+</p>
+</details>
+
+#### Ribosomal genes for QC <abbr title="RNAseq">![RNAseq](img/r_sm.png)</abbr>
+<details><summary>human</summary>
+<p>
+
+```
+cat $BASEDIR/reference_genome/all_sequences.dict >$BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.ribo_intervals
+grep 'gene_biotype "rRNA"' $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf | awk '$3 == "exon"' | cut -f1,4,5,7,9 | perl -lane '/transcript_id "([^"]+)"/ or die "no transcript_id on $.";print join "\t", (@F[0,1,2,3], $1)' | sort -k1V -k2n -k3n >>$BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.ribo_intervals
+```
+
+</p>
+</details>
+
+## Other
+
+#### Illumina adapters 
+
+<details><summary>human</summary>
+<p>
+
+```
+mkdir $BASEDIR/miscellaneous
+cd $BASEDIR/miscellaneous
+wget -O illumina_multiplex.fa https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/raw/refs/heads/main/reference_inputs/illumina_multiplex.fa
+```
+
+</p>
+</details>
+
+#### QC annotation files 
+
+<details><summary>human</summary>
+<p>
+
+```
+cd $BASEDIR/aligner_indices/biscuit_0.3.8
+wget http://zwdzwd.io/BISCUITqc/hg38_QC_assets.zip
+unzip hg38_QC_assets.zip
+```
+
+</p>
+</details>
