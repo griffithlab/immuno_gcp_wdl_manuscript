@@ -184,7 +184,7 @@ docker run -it --env WORKING_BASE --env PATIENT_ID -v $HOME/:$HOME/ -v $HOME/.co
 cd $WORKING_BASE
 mkdir manual_review
 
-python3 /opt/scripts/generate_reviews_files.py -reviewed_candidates itb-review-files/*.tsv -annotated_tsv generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa.manufacturability.tsv -classI final_results/pVACseq/mhc_i/*.all_epitopes.aggregated.tsv -classII final_results/pVACseq/mhc_ii/*.all_epitopes.aggregated.tsv -samp $PATIENT_ID -o manual_review/
+python3 /opt/scripts/generate_reviews_files.py -reviewed_candidates itb-review-files/*.tsv -51mer generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa.manufacturability.tsv -classI final_results/pVACseq/mhc_i/*.all_epitopes.aggregated.tsv -classII final_results/pVACseq/mhc_ii/*.all_epitopes.aggregated.tsv -samp $PATIENT_ID -o manual_review/
  
 python3 /opt/scripts/color_peptides51mer.py -peptides ../manual_review/*Peptides_51-mer.xlsx -probPos C -samp $PATIENT_ID -o ../manual_review/
 ```
