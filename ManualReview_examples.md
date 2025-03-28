@@ -83,7 +83,11 @@ This somatic variant always happens in phase with a C deletion right before it (
 Somatic variant looks real in DNA and RNA. 1 proximal germline variant downstream of variant of interest -- resutls in a R->H which is properly accounted for in the 51mer. 51 mer spans 1 exon. No unexpected RNA splicing. Majority of reads support the chosen transcript.
 
 # ONES TO CHECK
-<img width="1000" alt="ABL2" src="hcc1395_screenshots/ASMTL.png" />
+#### CDC42BPA
+(see above)
+
+#### ASMTL
+<img width="1000" alt="ASMTL" src="hcc1395_screenshots/ASMTL.png" />
 
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/NOTCH4.png" />
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/NOTCH4_noRNAevidence.png" />
@@ -94,7 +98,7 @@ The somatic variant does not look real; The noted insertion seems to be a misali
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHB4_sashimi.png" />
 The somatic variant looks real in DNA but does not appear in RNA despite multiple reads spanning the region. The RNA reads align to small parts of the big exon and hence the sashimi plot shows many different splicings. The transcript's support is NA. -- Reject because no RNA expression. This gene is apart of a family of receptor like genes, it is difficult to map reads to this region.
 
-
+#### PCDHGA1
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1.png" />
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1_variant.png" />
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1_sashimi.png" />
