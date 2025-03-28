@@ -74,12 +74,12 @@ This somatic variant always happens in phase with a C deletion right before it (
 ### Reference Match
 
 #### FGFR1
-<img width="1000" alt="ABL2" src="hcc1395_screenshots/FGFR1.png" />
+<img width="1000" alt="ABL2" src="hcc1395_screenshots/FGFR1_refmatch.png" />
 
 ### Germline Variant Accounted For
 
 #### SERPINA1
-<img width="1000" alt="ABL2" src="hcc1395_screenshots/SERPINA1_AccountedForFermlineVariant.png" />
+<img width="1000" alt="ABL2" src="hcc1395_screenshots/SERPINA1_AccountedForGermlineVariant.png" />
 Somatic variant looks real in DNA and RNA. 1 proximal germline variant downstream of variant of interest -- resutls in a R->H which is properly accounted for in the 51mer. 51 mer spans 1 exon. No unexpected RNA splicing. Majority of reads support the chosen transcript.
 
 # ONES TO CHECK
