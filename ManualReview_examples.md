@@ -24,7 +24,7 @@ Deletion of 24 bases looks real in DNA but there are no called reads of evidence
 
 #### F2
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/F2.png" />
-<img width="1000" alt="ABL2" src="hcc1395_screenshots/F2_geneskipped.png" />
+<img width="1000" alt="ABL2" src="hcc1395_screenshots/F2_geneSkiped.png" />
 Somatic variant looks real in DNA but is in a region of relatively low coverage in RNA (2 reads with variant is found at RNA level). 1 proximal germline variant, results in no AA change. RNA reads dont support the chosen transcript, sashimi plot shows that the chosen transcript isnt being utilized. 
 
 #### GPR68
