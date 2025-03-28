@@ -96,7 +96,7 @@ The somatic variant looks real in DNA but does not appear in RNA despite multipl
 
 
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1.png" />
-<img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1_gene.png" />
+<img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1_variant.png" />
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1_sashimi.png" />
 The somatic variant looks real in DNA but is in a region of poor coverage in RNA, so 6/15 reads support the variant in RNA level. Sashimi plot shows multiple RNA splicing where the annotated transcript (although appears to be good) does not appear to be utilized. Reject. -- Another group in a family of genes that shoe "immunoglobulin-like organization", I think this is a region where mapping is strange.
 
