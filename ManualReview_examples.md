@@ -47,6 +47,11 @@ Somatic variant looks real in DNA and has very low support in RNA  No proximal g
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/NFASC_incorrecttranscript.png" />
 Somatic variant looks real in DNA but there is no RNA coverage of this region -- we have to reject on the bases of my evidence of expression. It appears that there are other transcripts that show this region as an intron, which could make more sense in this case. 
 
+#### ZNF548
+<img width="1000" alt="ABL2" src="hcc1395_screenshots/ZNF548.png" />
+<img width="1000" alt="ABL2" src="hcc1395_screenshots/ZNF548_alternateSplicing.png" />
+Somatic variant looks real in DNA and RNA. 51 mer, classII spans upstream exon. 51 mer spans downstream exon. No proximal variants.  There is an unexpected splicing event whihc results in many reads skipping the exon entirely, still several reads support this exon and it has good coverage. I think we can accept this candidate. 
+
 ### Dinucleotide Miscall
 
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/TRIB1.png" />
@@ -94,5 +99,8 @@ The somatic variant looks real in DNA but does not appear in RNA despite multipl
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1_gene.png" />
 <img width="1000" alt="ABL2" src="hcc1395_screenshots/PCDHGA1_sashimi.png" />
 The somatic variant looks real in DNA but is in a region of poor coverage in RNA, so 6/15 reads support the variant in RNA level. Sashimi plot shows multiple RNA splicing where the annotated transcript (although appears to be good) does not appear to be utilized. Reject. -- Another group in a family of genes that shoe "immunoglobulin-like organization", I think this is a region where mapping is strange.
+
+<img width="1000" alt="ABL2" src="hcc1395_screenshots/TRIM69.png" />
+The 1-base insertion has a 18-base deletion immediate upstream (the next variant). Somatic variant looks real in DNA and RNA. Upstream large 18-base deletion. No unexpected RNA splicing. Majority of reads support the chosen transcript. Might accept but will need to validate if the peptide generated reflects both mutations as they happen together. 
 
 Somatic variant looks real in DNA and RNA. There are three proximal variants. (1) There is a missense variant  in upstream 51mer region , which is another neoantigen candidate. (2) A missense somatic variant  in downstream 51mer region ,leads to a change from V to M (3) A  synonymous somatic variant  in downstream 51mer region. No unexpected RNA splicing. Majority of reads support the chosen transcript.  51 mer spans  downstream.  -- All these variants are accounted for in the 51mer.
