@@ -44,6 +44,15 @@ From docker image `mgibio/picard-cwl:2.18.1`
 java -jar /opt/picard/picard.jar CreateSequenceDictionary R=$BASEDIR/reference_genome/all_sequences.fa O=$BASEDIR/reference_genome/all_sequences.dict
 ```
 
+#### Ensembl Synonyms file
+
+We will download the chromAlias file from UCSC genome browser and restrict it to lines in Ensembl
+
+```
+wget -O $BASEDIR/reference_genome/chromAlias.txt.gz https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/chromAlias.txt.gz
+zgrep 'ensembl' chromAlias.txt.gz > chromAlias.ensembl.txt
+rm chromAlias.txt.gz
+```
 
 ## Ensembl/VEP annotation files
 
@@ -54,6 +63,7 @@ Inside that container, run the following (mount the appropriate volumes if neede
 ```
 mkdir $BASEDIR/vep_cache
 /usr/bin/perl /opt/vep/src/ensembl-vep/INSTALL.pl --CACHEDIR $BASEDIR/vep_cache --AUTO cf --SPECIES homo_sapiens --ASSEMBLY GRCh38
+zip -r $BASEDIR/vep_cache.zip $BASEDIR/vep_cache
 ```
 
 If for some reason the desired cache version and docker image version in use do not match, add `--CACHE_VERSION <version>`
@@ -80,10 +90,13 @@ perl convertEnsemblGTF.pl $BASEDIR/reference_genome/all_sequences.dict $BASEDIR/
 
 #### Transcriptome cDNA reference 
 
-Note that we're not going to convert these coordinates from [1,2,3] to [chr1,chr2,chr3], since Kallisto doesn't include coordinates in it's output.  If pseudobams from kallisto are desired, that conversion would need to be done.
+Note that we're not going to convert these coordinates from [1,2,3] to [chr1,chr2,chr3], since Kallisto doesn't include coordinates in it's output.  If pseudobams from kallisto are desired, that conversion would need to be done. We will get both the coding (cdna) and non-coding (ncrna) files and combine them.
 
 ```
 wget -O $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz
+wget -O $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.ncrna.fa.gz https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/ncrna/Homo_sapiens.GRCh38.ncrna.fa.gz
+
+cat $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.ncrna.fa.gz > $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.ncrna.fa.gz
 ```
 
 
@@ -91,7 +104,7 @@ wget -O $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz https://f
 
 #### bwa mem index 
 
-From docker image: `mgibio/alignment_helper-cwl:1.0.0`
+From docker image: `mgibio/alignment_helper-cwl:2.1.1`
 
 ```
 mkdir -p $BASEDIR/aligner_indices/bwamem_0.7.15 
@@ -99,7 +112,7 @@ cd $BASEDIR/aligner_indices/bwamem_0.7.15
 for i in all_sequences.fa all_sequences.fa.fai all_sequences.dict all_sequences.genome;do 
     ln -s $BASEDIR/reference_genome/$i .
 done
-/usr/local/bin/bwa index all_sequences.fa
+bwa-mem2 index all_sequences.fa
 ```
 
 
@@ -107,9 +120,12 @@ done
  In the `trinityctat/starfusion` docker container:
 
 ```
-mkdir -p $BASEDIR/aligner_indices/star_fusion 
-cd $BASEDIR/aligner_indices/star_fusion
+mkdir -p $BASEDIR/aligner_indices/star_fusion/temp 
+cd $BASEDIR/aligner_indices/star_fusion/temp
 /usr/local/src/STAR-Fusion/ctat-genome-lib-builder/prep_genome_lib.pl --CPU 10 --genome_fa $BASEDIR/reference_genome/all_sequences.fa --gtf $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf --pfam_db current --dfam_db human --output_dir $BASEDIR/aligner_indices/star_fusion
+#based on logfile, this was unsuccessful => issue might be solved by entering a temporary directory but running hte rest of the command the same way. 
+# temp directory worked. Now just need to figure out which files to zip. Will use our actual starfusion.zip dir as reference; copying to temp_real_star_fusion_dir and unzipping.
+
 ```
 
 
@@ -123,12 +139,13 @@ from the `google/cloud-sdk` image:
 
 ```
 mkdir $BASEDIR/known_variants
-gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf $BASEDIR/known_variants
-gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx $BASEDIR/known_variants
+gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf $BASEDIR/known_variants 
+TODO BGZIP THIS VCF AND TABIX
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz $BASEDIR/known_variants
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi $BASEDIR/known_variants
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz $BASEDIR/known_variants
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi $BASEDIR/known_variants
+
 ```
 
 
@@ -148,9 +165,29 @@ wget -O $BASEDIR/known_variants/docm.vcf.gz.tbi https://github.com/evelyn-schmid
 This command downloads the V3 of the genome [Gnomad Database](https://gnomad.broadinstitute.org) which has the allele frequencies from 70k WGS samples aligned to GRCh38. This file is ~236gb.
 
 ```
-# TODO FIGURE OUT WHERE WE WANT TO UPLOAD THESE FILES
-wget -O $BASEDIR/known_variants/gnomad.genomes.r3.0.sites.vcf.gz https://storage.googleapis.com/gnomad-public/release/3.0/vcf/genomes/gnomad.genomes.r3.0.sites.vcf.bgz
-wget -O $BASEDIR/known_variants/gnomad.genomes.r3.0.sites.vcf.gz.tbi https://storage.googleapis.com/gnomad-public/release/3.0/vcf/genomes/gnomad.genomes.r3.0.sites.vcf.bgz.tbi
+#Download gnomad V3 VCFs for each chromosome, concatenate, and filter to AF>0.001.
+mkdir $BASEDIR/known_variants/gnomad_temp
+# Step 1: Download VCFs
+for chr in {1..22} X Y; do
+  wget https://ftp.ensembl.org/pub/data_files/homo_sapiens/GRCh38/variation_genotype/gnomad/v3.1.2/gnomad.genomes.v3.1.2.sites.chr${chr}_trimmed_info.vcf.bgz
+done
+
+# Step 2: Concatenate bgzipped VCFs (headers only from first file)
+bcftools concat -Oz -o gnomad.genomes.v3.1.2.concatenated.vcf.bgz \
+  gnomad.genomes.v3.1.2.sites.chr{1..22}_trimmed_info.vcf.bgz \
+  gnomad.genomes.v3.1.2.sites.chrX_trimmed_info.vcf.bgz \
+  gnomad.genomes.v3.1.2.sites.chrY_trimmed_info.vcf.bgz
+
+# Step 3: Index the concatenated VCF
+bcftools index -t gnomad.genomes.v3.1.2.concatenated.vcf.bgz
+
+# Step 4: Restrict to variants with AF > 0.001
+bcftools view -i 'INFO/AF[0]>0.001' -Oz -o gnomad_b38_exome.vcf.gz gnomad.genomes.v3.1.2.concatenated.vcf.bgz
+bcftools index -t gnomad_b38_exome.vcf.gz
+
+# Step 5: Copy gnomad VCF to knownvariants and optionally delete original folder
+cp $BASEDIR/known_variants/gnomad_temp/gnomad_b38_exome.vcf.gz* $BASEDIR/known_variants/
+
 ```
 
 Can create a lite version containing the population allele frequencies from the full vcf using using bcftools. Tested using bcftools version 1.9.
@@ -178,24 +215,25 @@ wget -O $BASEDIR/known_variants/somalier_GRCh38.vcf.gz https://github.com/brentp
 From docker image `mgibio/rnaseq`
 
 ```
-kallisto index -i $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.kallisto.idx $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz
+kallisto index -i $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.ncrna.fa.kallisto.idx $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.ncrna.fa.gz
+
 ```
 
 
 #### Kallisto gene translation table 
 
 
-From docker image `quay.io/biocontainers/bioconductor-biomart:2.42.0--r36_0`
+From docker image `quay.io/biocontainers/bioconductor-biomart:2.62.0--r44hdfd78af_0`
 
 ```
 cd $BASEDIR/rna_seq_annotation/
-Rscript -e 'library(biomaRt);mart <- useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="http://jan2019.archive.ensembl.org/");t2g <- getBM(attributes=c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name"), mart=mart);t2g <- t2g[order(t2g$ensembl_gene_id), ]; write.table(t2g,"ensembl113.transcriptToGene.tsv",sep="\t",row.names=F,quote=F)'
+Rscript -e 'library(biomaRt);mart <- useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl");t2g <- getBM(attributes=c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name"), mart=mart);t2g <- t2g[order(t2g$ensembl_gene_id), ]; write.table(t2g,"ensembl113.transcriptToGene.tsv",sep="\t",row.names=F,quote=F)'
 ```
 
 
 #### Refflat genes for QC 
 
-In docker container: `quay.io/biocontainers/ucsc-gtftogenepred:377--h35c10e6_2`
+In docker container: `quay.io/biocontainers/ucsc-gtftogenepred:469--h664eb37_1`
 
 ```
 gtfToGenePred -genePredExt -geneNameAsName2 -ignoreGroupsWithoutExons $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf /dev/stdout | awk 'BEGIN { OFS="\t"} {print $12, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' >$BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.refFlat.txt
@@ -210,6 +248,11 @@ cat $BASEDIR/reference_genome/all_sequences.dict >$BASEDIR/rna_seq_annotation/Ho
 grep 'gene_biotype "rRNA"' $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf | awk '$3 == "exon"' | cut -f1,4,5,7,9 | perl -lane '/transcript_id "([^"]+)"/ or die "no transcript_id on $.";print join "\t", (@F[0,1,2,3], $1)' | sort -k1V -k2n -k3n >>$BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.ribo_intervals
 ```
 
+#### AGFusion database
+
+```
+??? Also need a new docker? https://hub.docker.com/r/mgibio/agfusion
+```
 
 ## Other
 
@@ -232,4 +275,23 @@ wget -O illumina_multiplex.fa https://github.com/evelyn-schmidt/immuno_gcp_wdl_m
 cd $BASEDIR/aligner_indices/biscuit_0.3.8
 wget http://zwdzwd.io/BISCUITqc/hg38_QC_assets.zip
 unzip hg38_QC_assets.zip
+```
+
+
+#### Capture reagents
+
+
+```
+cd $BASEDIR/miscellaneous
+wget -O IDT_xGen_Lockdown_Exome_v1.baits.interval_list https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/raw/refs/heads/main/reference_inputs/IDT_xGen_Lockdown_Exome_v1.baits.interval_list
+wget -O IDT_xGen_Lockdown_Exome_v1.targets.interval_list https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/raw/refs/heads/main/reference_inputs/IDT_xGen_Lockdown_Exome_v1.targets.interval_list
+```
+
+
+#### Peptides FASTA file
+
+```
+cd $BASEDIR/miscellaneous
+wget -O Homo_sapiens.GRCh38.pep.all.fa.gz https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
+
 ```
