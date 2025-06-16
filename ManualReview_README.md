@@ -1,5 +1,7 @@
 # Manual Review REEADME
 
+## Add something about running pVACvector
+
 ## Initial review of Immuno Pipeline Outputs
 At this stage we mostly just want to confirm that the pipeline succeeded and that transferring the data files into the case folder on storage1 was successful.  Check the total number and total size of files.  In order to proceed these files must all be present: tumor/normal DNA BAMs, RNA BAM, variants VCF annotated for pVACseq, proximal variants VCF, annotated variants TSV, HLA typing results, FDA QC report files, pVACseq/pVACview results file. 
 Presentation to the Immunogenomics Tumor Board (ITB)
