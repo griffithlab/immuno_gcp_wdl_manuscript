@@ -784,6 +784,36 @@ Using the selected transcript, extract 51-mer peptide sequences that contain the
     1. One that has a mutant peptide sequence for every mutation that was evaluated "Accept,Review" during the ITB meeting and based only on the top transcript. This should be close to the final set of sequences you want.
     2. One that has a mutant peptide sequence for every mutation, generated for every transcript. This may be needed to manually adjust the final set of peptides to account for transcript expression, alternative splicing, etc.
 
+An example of how this command would look:
+```bash
+gzcat $WORKING_BASE/final_results/annotated.expression.vcf.gz | less
+export TUMOR_SAMPLE_ID="hcc1395-tumor-exome"
+
+docker run -it --env WORKING_BASE --env TUMOR_SAMPLE_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/pvactools:4.0.1 /bin/bash
+
+cd $WORKING_BASE/
+
+pvacseq generate_protein_fasta \
+      -p $WORKING_BASE/final_results/pVACseq/phase_vcf/phased.vcf.gz \
+      --pass-only --mutant-only -d 150 \
+      -s ${TUMOR_SAMPLE_ID} \
+      --aggregate-report-evaluation {Accept,Review} \
+      --input-tsv $WORKING_BASE/itb-review-files/*.tsv \
+      $WORKING_BASE/final_results/annotated.expression.vcf.gz \
+      25 \
+      $WORKING_BASE/generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa
+ 
+pvacseq generate_protein_fasta \
+      -p  $WORKING_BASE/final_results/pVACseq/phase_vcf/phased.vcf.gz \
+      --pass-only --mutant-only -d 150 \
+      -s ${TUMOR_SAMPLE_ID} \
+      $WORKING_BASE/final_results/annotated.expression.vcf.gz \
+      25 \
+      $WORKING_BASE/generate_protein_fasta/all/annotated_filtered.vcf-pass-51mer.fa
+
+exit
+```
+
 ## Final Reporting
 
 All of the above findings should be summarized in a report and shared with the ITB group for final review prior to ordering the vaccine. The report files should be uploaded to the appropriate patient folder in Wustl Box and consist of the following **five** components:
