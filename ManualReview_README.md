@@ -744,7 +744,7 @@ an IGV session with the following 6 components in order:
 Save the session file on storage 1 for others to use. Use this session to perform the following
 specific review activities and make note of the findings in the candidate review spreadsheet.
 
-- **Somatic variant revie**: For any peptide candidate being considered for inclusion in the
+- **Somatic variant review**: For any peptide candidate being considered for inclusion in the
 design, manually review the underlying somatic variant in IGV to make sure it appears to
 be a real somatic variant. Our [published guidelines](https://www.nature.com/articles/s41436-018-0278-z)
 can be used for this step.
@@ -816,7 +816,19 @@ exit
 
 ## Final Reporting
 
-All of the above findings should be summarized in a report and shared with the ITB group for final review prior to ordering the vaccine. The report files should be uploaded to the appropriate patient folder in Wustl Box and consist of the following **five** components:
+Generate files for final reporting:
+
+```bash
+docker pull griffithlab/neoang_scripts
+docker run -it --env WORKING_BASE --env PATIENT_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts /bin/bash
+
+cd $WORKING_BASE
+mkdir manual_review
+
+python3 /opt/scripts/generate_reviews_files.py -reviewed_candidates itb-review-files/*.tsv -peptides generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa.manufacturability.tsv  -classI final_results/pVACseq/mhc_i/*.all_epitopes.aggregated.tsv -classII final_results/pVACseq/mhc_ii/*.all_epitopes.aggregated.tsv -samp $PATIENT_ID -o ../manual_review/
+
+python3 /opt/scripts/color_peptides51mer.py -peptides ../manual_review/*Peptides_51-mer.xlsx -samp $PATIENT_ID -probPos C -cIIC50=1000 -cIpercent=2 -cIIIC50=500 -cIIpercent=2 -o ../manual_review/
+```
 
 ### 1. Peptide Fasta
 
