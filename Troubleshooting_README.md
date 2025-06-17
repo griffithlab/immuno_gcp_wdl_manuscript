@@ -1,17 +1,29 @@
 # Troubleshooting README
 
-Here we will give examples of problems that you may encounter during the ITB and immunogenomics review prcess
+Here we will give examples of problems that you may encounter during the ITB and immunogenomics review process
 
 ## TODO- NEED TO ADD SOME TROUBLESHOOTING EXAMPLES FOR FAILURES IN THE PIPELINE RUN ITSELF. (mentioning some general ideas here)
 
-1. Most common errors related to user error when generating the YAML file. Check the cloud YAML file after cloudize workflows to make sure that all the file paths are in the google cloud bucket. And also check that all the files got uploaded. Also, check that the sample name in the readgroup is identical to the sample name in the field below.
 2. Cromwell logging is difficult to parse, so there is not a single good way to troubleshoot a run failure. However, a good place to start is looking if there is a message pointing the user to a stderr log file from a step. 
 
 ## YAML Checker Scripts
+Most common errors related to user error when generating the YAML file. Check:
+- cloud YAML file after cloudize workflows to make sure that all the file paths are in the google cloud bucket
+- that all the files got uploaded
+- check that the sample name in the readgroup is identical to the sample name in the field below.
+   
+```bash
+# download python script
+gsutil cp gs://jlf-rcrf-immuno-outputs/annotation_igv/validate_immuno_yaml.py .
 
-## Preparing for ITB Review
+# run script (might take a few minutes depending on number of files it has to check)
+docker run -it --env HOME -v $PWD/:$PWD/ -v $HOME/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest python3 $HOME/validate_immuno_yaml.py $HOME/yamls/${GCS_CASE_NAME}_immuno_cloud-WDL.yaml
+```
 
-After the pipeline run has been completed, we can verify that the outputs look normal and begin creating a summary of the pipeline to be presented at the ITB Review meeting where a panel of experts will review the predicted neoantigens. These meetings usually are about a 30 minutes to an hour per case so it is useful to create a case summary which we call a Genomics Review Report to orient everyone to the case. Some suggested information to include at the top of the report would be: an introduction to the case including things like cancer type, past treatments, any anynomallies and a list/links to the most important files used for this case (namely the IGV and pvacview files) .
+### The strand settings
+A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol, we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting the strand setting in the yaml to unstranded is safest because it essentially does not consider the directionality of the reads during mapping. However, this does result in a loss of information. If you set your yaml to first strand when the protocol is second or unstranded, you could potentially lose whole genes depending on overlap...
+
+**how to manually infer strandedness**
 
 ### FDA Thresholds
 
@@ -20,7 +32,7 @@ This is an example of how this data table should look for a very high data quali
 ![FDA Quality Thresholds for Leidos-5120-28](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/0850f4d8-192f-4295-8d05-0a9907006ded)
 
 
-This is an example of a case that suffered from low input tumor material resulting in tumor DNA coverage being deficient and uneven and suffering from a very high duplication rate. This likely contributed to a high false-positive rate with many variants not surviving basic filtering or manual review. Tumor RNA similarly suffered from an apparent high level of genomic contamination. As a result, several prioritized neoantigen candidates failed after dedicated IGV manual review, and the high duplication rate created situations where all variant support came from a set of identical/duplicate read alignments. 
+This is an example of a case that suffered from low input tumor material, resulting in tumor DNA coverage being deficient and uneven and suffering from a very high duplication rate. This likely contributed to a high false-positive rate with many variants not surviving basic filtering or manual review. Tumor RNA similarly suffered from an apparent high level of genomic contamination. As a result, several prioritized neoantigen candidates failed after dedicated IGV manual review, and the high duplication rate created situations where all variant support came from a set of identical/duplicate read alignments. 
 
 ![FDA Quality Thresholds for JLF-100-060](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7fd55b36-586c-4882-b00e-cab71b8ea94a)
 
@@ -43,11 +55,6 @@ YAML file: immuno.strand: first
 Total Number of somatic variants called: 67
 ```
 
-#### The strand settings
-A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol, we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting the strand setting in the yaml to unstranded is safest because it essentially does not consider the directionality of the reads during mapping. However, this does result in a loss of information. If you set your yaml to first strand when the protocol is second or unstranded, you could potentially lose whole genes depending on overlap...
-
-**how to manually infer strandedness**
-
 #### End Bias
 
 Visually inspect the plot located at `qc/tumor_rna/rna_metrics.pdf`. If the RNA-seq data is of good quality from intact RNA the plot should have a “horseback” shape, representing lower coverage at the beginning and end of transcripts but quickly rising and remaining relatively high over the majority of the transcript positions. RNA-seq data made from highly degraded RNA combined with polyA selection or oligo-dT cDNA priming can have a heavily biased distribution instead. Such data can still produce gene expression estimates but will be unable to effectively verify the expression of somatic variant alleles.
@@ -58,91 +65,15 @@ An example of a good end bias plot:
 An example of a poor end-bias plot. This case was run with the yaml set to "unstranded" when the detected strandedness of the RNA data was unstranded. **is this the reson of this plot???**
 ![jlf-100-067 end-bias BAD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/649f9477-2d85-450c-8257-282c3be60abf)
 
-
-### Fusion Review
-Open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion would be one with more than 10 reads. Then we check to see if there are different left/right genes and different left-right chromosomes. Most of them are going to genes that are next to each other and it isread through rather than a real fusion. 
-
-![fusion_table JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/33f699ac-a555-4569-ac01-9797421a3f53)
-
-The very first row is the only possible candidate with a lot of junctions reads but it's not spanning different chromosomes. This is an example of a read through:
-![fusion_read_through JLF-100-043](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/cccd3c1a-41dd-4c28-9d40-0c9389fd72aa)
-
-This example shows a possible frameshift in the first row, it has a ton of reads and fragments and is between two different chromosomes and genes.
-![fusion table real jlf-100-056](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/c6e41e09-bd7a-4cf3-8228-3e7b3b45f0cd)
-
-This is a real fusion, we see lots of spanning reads which are bringing the middle of the two genes together. 
-![fusion_real jlf-100-056](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/3ddf57a4-2342-4750-91b4-9a8872e212d7)
-
-**what do you do next? -- test for binding?? Run pvacfuse??**
-
-#### JLF-100-037_mcdb041-original
-Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor. The peptide sequence corresponds to the tumor-specific frameshift sequence created by the fusion event.
-
-The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific.  It is simply the wild-type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
-
-We also examined a fusion prediction for ZNF92::TDRD9 which had 44 junctions reads of support and looks real by manual review in fusion inspector and IGV. However this fusion is predicted to join the first exon of ZNF92 onto the second exon of TDRD9 and this is predicted to lead to an almost immediate stop codon.  The overall ORF would only be 10 AA or so and this is unlikely to be translated.
-
-We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction reads and 2 spanning reads of support.  It is predicted to lead to an almost immediate stop codon.  The neoORF segment would be: MLFHGCLS.  This truncation would be a drastic shortening of the normal KMT2C protein.  The only thing that is predicted to be a good binder is: MSHGVPMLF.  In other words only incorporating the first 3 AA of the novel sequencing arising from the fusion.  This is probably not worth targeting.
-
 ### HLA Allele Review
 Make sure the HLA alleles that are being used in pVACview for the final selection of candidates match up with those expected for the case based on Optitype/PHLAT predictions from the data and clinical HLA typing results if available. Check whether the HLA alleles predicted for normal and tumor samples are in agreement.  Note any discrepancies.
 
 Check the files in the location `gcp_immuno/final_results/hla_typing`. Make sure optitype_tumor_result.tsv and opitype_normal_result.tsv are the same, phlat_normal_HLA.sum and phlat_tumor_HLA.sum are the same. And all these calls match hla_calls.txt.
 
-
-#### Generate the Peptide order form
-```
-export PATIENT_ID="hcc1395"
-
-docker pull griffithlab/neoang_scripts
-docker run -it --env WORKING_BASE --env PATIENT_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts /bin/bash
-
-cd $WORKING_BASE
-mkdir manual_review
-
-python3 /opt/scripts/generate_reviews_files.py -reviewed_candidates itb-review-files/*.tsv -51mer generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa.manufacturability.tsv -classI final_results/pVACseq/mhc_i/*.all_epitopes.aggregated.tsv -classII final_results/pVACseq/mhc_ii/*.all_epitopes.aggregated.tsv -samp $PATIENT_ID -o manual_review/
- 
-python3 /opt/scripts/color_peptides51mer.py -peptides ../manual_review/*Peptides_51-mer.xlsx -probPos C -samp $PATIENT_ID -o ../manual_review/
-```
-
-Open colored_peptides51mer.html and copy the table into an excel spreadsheet. The formatting should remain. 
-
-Maybe some screenshots of these spreadsheets.
-
-### pVACview Review
-
-Binding algorithm support, anchor position
-Variants compared to CLE pipeline
-IGV review
-Somatic variant review (SOP)
-Proximal variants review (also look for germline variants, neoantigen candidate may have to be changed to account for it)
-RNAseq allele review
-Transcript isoform review
-
-##### Leidos 5120-29 
-SLC1A7 candidate (original status: Review) was dropped during the manual review. Short explanation: the Class I peptide which doesnt have reference match has bad binding affinity, Class II peptide has reference match. Long explanation: This candidate has 2 transcript sets (ENST00000620347.5 and ENST00000371494.9) , both transcript sets have a matched portion (LQALLIVL) with proteome reference. Class II peptide (QALLIVLATSSSSA, from ENST00000371494.9) has a complete overlap with the reference, thus was rejected. Class I peptide for HLA-C*03:04 (VLATSSSSATL, from ENST00000371494.9) can still be used (if we cut the 51 mer to exclude the reference match portion), however this peptide is a bad binder (median IC50 greater than 2,000 nM, with multiple algorithms reports high IC50). Class I peptide for HLA-A (ILQALLIVL from ENST00000620347.5) has good binding affinity but has a strong reference match.  
-
-#####  Assessing Read quality
+###  Assessing Read quality
 
 the high duplication rate appeared to create situations where all variant support came from a set of identical/duplicate read alignments
 ![JLF-100-060 SLF2 variant high duplication rate](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/e5baa217-3cb0-4b4f-9ea4-f21dedee0133)
-
-#####  Further examples:
-https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html
-
-#####  General comment structure
-
-When beginning review I used this general comment structure to make sure I was paying attention to the correct aspects.
-
-1. Binding affinity for classI and %ile look good/ ClassII binding affinity and %ile
-2. DNA, RNA VAFs and allele expression
-3. Anchor position
-4. Algorithm and elution 
-5. Note anything else strange
-   
-### IGV Review
-
-![JLF-100-066 – Insertion misalignment - DSTN](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7a81f397-56e0-410b-857e-14985be0f9eb)
 
 ### Unaccounted for Germline Variants
 (Leidos Case 5120-28) MST1R (screenshots below) had an upstream frameshift mutation which was not accounted for in the 51mer sequences. The sequence has been manually fixed and the germline variant is marked in purple. We have not yet determined why this germline variant was not automatically accounted for. 
@@ -166,6 +97,47 @@ A really detailed description on exploring a germline varaint in 5120-18
 
 ![5120-27 CPEB2 alternative splicing peptide sequences](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/a13601c7-10e6-4548-8ec8-50cd00f0d047)
 
+### Alterations to best peptide that needs reanalysis of binding
+
+### Fusion Review
+Open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion would be one with 
+- Junction reads + Spanning read counts > 5 and junction reads >= 1
+- The fusion is not a read-through
+  - Left Chr and Right Chr are different OR chromosome are the same BUT Left Strand and Right Strand are different OR chromosome and strand are the same BUT ABS(Left Pos - Right Pos) < 1,000,000 OR Fusion GeneA Name OR Fusion GeneB Name matches a known fusion driver gene
+- The fusion has large anchor support 
+
+We have created [fusion review scripts](https://github.com/kcotto/fusion_review_initial/tree/main) that pull our fusions from the above-listed criteria. 
+**SHOULD WE INCLUDE THE REVIEW SCRIPTS? what do you do next? -- test for binding?? Run pvacfuse??**
+
+
+#### Example: GMB119
+<img width="1706" alt="GMB119 fusion inspector" src="https://github.com/user-attachments/assets/cbb288bd-066c-4640-8363-bb47b9df1f4e" />
+
+The PLCG1::LEUTX fusion candidate mentioned above is predicted to produce two possible transcript fusions:
+
+211.PLCG1_LEUTX.ENST00000244007_ENST00000638280.inframe_fusion.72
+210.PLCG1_LEUTX.ENST00000244007_ENST00000396841.frameshift_fusion.72
+
+<img width="1507" alt="GBM119 fusion binding" src="https://github.com/user-attachments/assets/93cb366e-16e4-42db-8ecc-6a7fbf00d3c7" />
+
+The frameshift version is not predicted to lead to a good class I peptide, but the inframe version is predicted to give rise to the following peptide with a percentile rank of 2.3% (for HLA-C*08:02).  IGV review of the fusion breakpoints suggests strong support (from soft-clipped reads) on both sides of the fusion in all three tumor regions samples. 
+
+Best peptide: GADKIEGAK 
+
+The fusion CDS sequence from FusionInspector is:
+MAGAASPCANGCGPGAPSDAEVLHLCRSLEVGTVMTLFYSKKSQRPERKTFQVKLETRQITWSRGADKIEGAKGPRRYRRPRTRFLSKQLTALRELLEKTMHPSLATMGKLASKLQLDLSVVKIWFKNQRAKWKRQQRQQMQTRPSLGPANQTTSVKKEETPSAITTANIRPVSPGISDANDHDLREPSGIKNPGGASASARVSSWDSQSYDIEQICLGASNPPWASTLFEIDEFVKIYDLPGEDDTSSLNQYLFPVCLEYDQLQSSV*
+
+While the fusion is certainly compelling, the best peptide spans the fusion breakpoint by only a single amino acid. “GADKIEGA” match the wild type PLCG1 sequence. The first amino acid on the LEUTX side, an “E” becomes “K” in the fusion product.  The rest of the sequence from that point is wildtype LEUTX sequence. In other words the amino acid sequence largely presented to the TCR is mostly just wild type PLCG1 sequence.  
+
+MT peptide: GADKIEGAK vs. WT peptide: GADKIEGAE
+
+The mutant and wild type versions of this peptide are not predicted to differ significantly in their binding/presentation.  For this reason, this fusion sequence is not a good candidate. 
+
+#####  Further examples:
+https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html
+
+
+### Other Examples -- TO REPLACE LATER
 ### Framshift miscount
 
 Leidos 5120-19 - RNA counts were corrected for two single base insertions showing that their expression was indeed supported despite initially having RNA VAFs of 0%: HES1 FS46 and RREB1	FS781-782
@@ -224,20 +196,23 @@ CKVVGARGVGKSA RHOT2 sequence based on reference
 LVVVGARGVGK   (911 nM) 11-mer KRAS G12R candidate
 CKVVGACGVGKSA RHOT2 sequence based on reference but with homozygous SNP applied
 
-### Alterations to best peptide that needs reanalysis of binding
-
 #### JLF-100-039_mcdb045
 The SLC9A6 on the other hand has a downstream missense variant (almost 4 bases away) that alters the expected best peptide, thus we do not have information of binding affinity, etc. for what would be the best new peptide. This candidate could potentially be rescued with additional effort if needed.
 
- #####  General comment structure
+#### JLF-100-037_mcdb041-original
+Results from pVACfuse were used to include a peptide for a GFPT1::ENOX2 fusion in this tumor. The peptide sequence corresponds to the tumor-specific frameshift sequence created by the fusion event.
 
-When beginning review I used this general comment structure to make sure I was paying attention to the correct aspects.
+The ALK portion of the EML4::ALK fusion was extracted and used with pVACbind to nominate candidates for that driver event. In this case, while the ALK sequence is the portion presumably amplified/activated by the fusion event, the actual ALK sequence is NOT tumor specific.  It is simply the wild-type ALK sequence, from exon 20 to the end of the protein that is fused as the 3’ component of the EML4::ALK fusion. 
 
-1. Somatic variant looks real (support in both RNA and DNA)
-2. DNA, RNA VAFs and allele expression
-3. Anchor position
-4. Algorithm and elution 
-5. Note anything else strange
+We also examined a fusion prediction for ZNF92::TDRD9 which had 44 junctions reads of support and looks real by manual review in fusion inspector and IGV. However this fusion is predicted to join the first exon of ZNF92 onto the second exon of TDRD9 and this is predicted to lead to an almost immediate stop codon.  The overall ORF would only be 10 AA or so and this is unlikely to be translated.
+
+We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction reads and 2 spanning reads of support.  It is predicted to lead to an almost immediate stop codon.  The neoORF segment would be: MLFHGCLS.  This truncation would be a drastic shortening of the normal KMT2C protein.  The only thing that is predicted to be a good binder is: MSHGVPMLF.  In other words only incorporating the first 3 AA of the novel sequencing arising from the fusion.  This is probably not worth targeting.
+
+
+##### Leidos 5120-29 
+SLC1A7 candidate (original status: Review) was dropped during the manual review. Short explanation: the Class I peptide which doesnt have reference match has bad binding affinity, Class II peptide has reference match. Long explanation: This candidate has 2 transcript sets (ENST00000620347.5 and ENST00000371494.9) , both transcript sets have a matched portion (LQALLIVL) with proteome reference. Class II peptide (QALLIVLATSSSSA, from ENST00000371494.9) has a complete overlap with the reference, thus was rejected. Class I peptide for HLA-C*03:04 (VLATSSSSATL, from ENST00000371494.9) can still be used (if we cut the 51 mer to exclude the reference match portion), however this peptide is a bad binder (median IC50 greater than 2,000 nM, with multiple algorithms reports high IC50). Class I peptide for HLA-A (ILQALLIVL from ENST00000620347.5) has good binding affinity but has a strong reference match.  
+
+
 
 
 
