@@ -1,34 +1,19 @@
 # Troubleshooting README
 
-The Immunotherapy Tumor Board (ITB) reviews all candidates and evaluates them as Accept, Reject, or Review. The candidates marked as Accept and Review will be reviewed in this 'Manual Review' section in two separate contexts, pVACview and IGV, to verify that they are good neoantigen candidates. 
-
-During the manual review process, we will primarily use two files: the Annotated Neoantigen Candidates Excel sheet, the classI produced from the ITB review, and the Peptides 51mer sheet, which we will generate below. 
-The Peptides 51mer sheet is generated in a certain format specified by the peptide manufacturer used for the neoantigen vaccine trials.
-
-To generate the Peptides 51mer Excel sheet there are two steps: (1) generating the protein fasta and (2) generating the manual review files.
+Here we will give examples of problems that you may encounter during the ITB and immunogenomics review prcess
 
 ## TODO- NEED TO ADD SOME TROUBLESHOOTING EXAMPLES FOR FAILURES IN THE PIPELINE RUN ITSELF. (mentioning some general ideas here)
 
 1. Most common errors related to user error when generating the YAML file. Check the cloud YAML file after cloudize workflows to make sure that all the file paths are in the google cloud bucket. And also check that all the files got uploaded. Also, check that the sample name in the readgroup is identical to the sample name in the field below.
 2. Cromwell logging is difficult to parse, so there is not a single good way to troubleshoot a run failure. However, a good place to start is looking if there is a message pointing the user to a stderr log file from a step. 
 
+## YAML Checker Scripts
+
 ## Preparing for ITB Review
 
 After the pipeline run has been completed, we can verify that the outputs look normal and begin creating a summary of the pipeline to be presented at the ITB Review meeting where a panel of experts will review the predicted neoantigens. These meetings usually are about a 30 minutes to an hour per case so it is useful to create a case summary which we call a Genomics Review Report to orient everyone to the case. Some suggested information to include at the top of the report would be: an introduction to the case including things like cancer type, past treatments, any anynomallies and a list/links to the most important files used for this case (namely the IGV and pvacview files) .
 
 ### FDA Thresholds
-
-Griffith lab discussions with the FDA have resulted in the creation of a set of values that set a very high standard of data quality. These metrics are pulled from several different files and then summarized in a table using the commands below:
-
-```bash
-mkdir $WORKING_BASE/../manual_review
-
-docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts:latest /bin/bash
-
-cd $WORKING_BASE/../manual_review
-
-python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
-```
 
 This is an example of how this data table should look for a very high data quality case. Note that the total reads often fail because the threshold is set at a very high level.
 
@@ -40,20 +25,6 @@ This is an example of a case that suffered from low input tumor material resulti
 ![FDA Quality Thresholds for JLF-100-060](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7fd55b36-586c-4882-b00e-cab71b8ea94a)
 
 ### Basic QC data review
-
-Using similar steps from above we will also examine other basic QC data that we find most useful in evaluating the case.
-
-```bash
-mkdir $WORKING_BASE/../manual_review
-
-docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts:latest /bin/bash
-
-cd $WORKING_BASE/../manual_review
-
-python3 /opt/scripts/get_neoantigen_qc.py -WB $WORKING_BASE -f final_results --yaml $WORKING_BASE/yamls/$CLOUD_YAML
-```
-
-We have created more concrete thresholds of evaluation for these metrics. 
 
 Here is an example (case 5120-18) of a typical qc summary:
 
@@ -71,6 +42,7 @@ trimmed_read_1strandness_check.txt: Data is likely RF/fr-firststrand
 YAML file: immuno.strand: first
 Total Number of somatic variants called: 67
 ```
+
 #### The strand settings
 A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol, we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting the strand setting in the yaml to unstranded is safest because it essentially does not consider the directionality of the reads during mapping. However, this does result in a loss of information. If you set your yaml to first strand when the protocol is second or unstranded, you could potentially lose whole genes depending on overlap...
 
@@ -117,62 +89,6 @@ Make sure the HLA alleles that are being used in pVACview for the final selectio
 
 Check the files in the location `gcp_immuno/final_results/hla_typing`. Make sure optitype_tumor_result.tsv and opitype_normal_result.tsv are the same, phlat_normal_HLA.sum and phlat_tumor_HLA.sum are the same. And all these calls match hla_calls.txt.
 
-### Open case in pVACview
-
-Take a look at the case in pVACview to make notes of anything that seems abnormal. Note how many candidates there are to review, the driving variants, framshift mutations, overall VAF/allele expression.
-
-## ITB Review
-
-Review the Genomic Review Report and note any concerning qc metrics, interesting candidates, or anything else abnormal about the case. Open pVACview and begin discussing candidates, generally taking note of:
-- is it a good binder
-- does it look well expressed
-- is it a good class II binder?
-- what are any potential probelms? TSL, reference match, problematic bases, etc
-- Is in an anchor? Is it a stronger binder than wildtype?
-- How many algorithms predict it a good binder?
-- Are the elution scores good? (generally less that 1 percentile)
-- Are there mutiple strong binding peptides arising from the variant?
-
-Add comments and mark the evalution accordingly. Make sure to export your comments and evaluations after the ITB review is over. 
-
-## Genomic Manual Review
-
-### Genomic Manual Review Setup
-
-#### Generate Protein Fasta
-
-First, we will generate an annotated fasta file using a tool that will extract protein sequences surrounding the variant. We will generate one fasta file with just the 'accept' and 'review' candidates and another with all proposed candidates. We do this because in some cases, the top candidate may not be the best one (e.g. a different transcript is found to be better during manual review) so we generate the unfiltered result so that one can consider alternatives.
-
-```bash
-gzcat $WORKING_BASE/final_results/annotated.expression.vcf.gz | less
-export TUMOR_SAMPLE_ID="hcc1395-tumor-exome"
-
-docker run -it --env WORKING_BASE --env TUMOR_SAMPLE_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/pvactools:4.0.1 /bin/bash
-
-cd $WORKING_BASE/
-
-pvacseq generate_protein_fasta \
-      -p $WORKING_BASE/final_results/pVACseq/phase_vcf/phased.vcf.gz \
-      --pass-only --mutant-only -d 150 \
-      -s ${TUMOR_SAMPLE_ID} \
-      --aggregate-report-evaluation {Accept,Review} \
-      --input-tsv $WORKING_BASE/itb-review-files/*.tsv \
-      $WORKING_BASE/final_results/annotated.expression.vcf.gz \
-      25 \
-      $WORKING_BASE/generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa
- 
-pvacseq generate_protein_fasta \
-      -p  $WORKING_BASE/final_results/pVACseq/phase_vcf/phased.vcf.gz \
-      --pass-only --mutant-only -d 150 \
-      -s ${TUMOR_SAMPLE_ID} \
-      $WORKING_BASE/final_results/annotated.expression.vcf.gz \
-      25 \
-      $WORKING_BASE/generate_protein_fasta/all/annotated_filtered.vcf-pass-51mer.fa
-
-exit
-```
-
-Once the peptide fastas have been created we can generate two final review files using some helper scripts. 
 
 #### Generate the Peptide order form
 ```
