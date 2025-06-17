@@ -63,6 +63,8 @@ categorized as MANE Select, GENCODE Primary or Ensembl Canonical, any one of whi
 would increase confidence in the quality of the transcript annotation. A screenshot of an
 example Ensembl transcript table is provided below for reference:
 
+<img width="1399" alt="ensemble transcript" src="https://github.com/user-attachments/assets/b3535886-6c38-4f73-880a-d9b021648d1f" />
+
 
 **Pos (Position)**
 
@@ -251,7 +253,7 @@ within the source gene are reported.
 
 Generally a candidate with reference matches is marked as Reject. A larger number of
 reference matches is considered more problematic. A large number of reference matches (e.g.
-> 3 ) is often observed when the neoantigen peptide has low complexity (e.g. contains a
+\> 3 ) is often observed when the neoantigen peptide has low complexity (e.g. contains a
 homopolymer stretch) or when it arises from a large gene family with a high degree of homology
 across family members.
 
@@ -280,28 +282,11 @@ In the following examples, the Best Peptide sequence is in bold, the mutant amin
 marked in red and the substring that matches between all three sequences is underlined.
 
 **Example 1** (from hcc 1395 benchmark analysis):
+<img width="951" alt="Ref Match SORBS3" src="https://github.com/user-attachments/assets/148197fd-2ce2-465d-a263-cdb951d486c4" />
 
-
-(A) The Best Peptide sequence is a 9 - mer mutant peptide from the gene SORBS 3 :
-**APSLSPHKM** ; (B) The Query Sequence is the 15 - mer: APYLGS **APSLSPHKM**. (C) The
-Matched Peptide is an 8 - mer exact match in the gene SLC 45 A 3 : S **APSLSPH**. Of the
-neoantigen peptide, 7 of 9 amino acids match exactly to the reference matching sequencing in
-another gene. In this example we would Reject the candidate.
-
-APYLGS **APSLSPHKM** - Query sequence from neoantigen gene SORBS 3
-**APSLSPHKM** - Best Peptide sequence from neoantigen gene SORBS 3
-S **APSLSPH** - Matched Peptide sequence from unexpected gene SLC 45 A 3
 
 **Example 2** (from hcc 1395 benchmark analysis):
-(A) The Best Peptide sequence is a 10 - mer mutant peptide from the gene FAM 217 B:
-**KENADEDSAG** ; (B) The Query Sequence is the 15 - mer: **NADEDSAG** DLSDSER. (C) The
-Matched Peptide is an 8 - mer exact match in the gene ZFHX 2 : **SAG** DLSDS. Of the neoantigen
-peptide, 3 of 10 amino acids match exactly to the reference matching sequencing in another
-gene. In this example we would Accept the candidate.
-
-**NADEDSAG** DLSDSER - Query sequence from neoantigen gene FAM 217 B
-**KENADEDSAG** - Best Peptide sequence from neoantigen gene FAM 217 B
-**SAG** DLSDS - Matched Peptide sequence from unexpected gene ZFHX 2
+<img width="971" alt="REf Match FAM217B" src="https://github.com/user-attachments/assets/3f63b2b1-b787-4484-aa52-39ea14ec38d5" />
 
 The general principle of Reference Match analysis is that we want to avoid the situation where
 the neoepitope sequence presented to the T cell by the Best Peptide could also be presented
@@ -443,8 +428,10 @@ on the assumption that the independent peptide elution mass spectrometry trainin
 provide insight.
 
 Example with high inter-algorithm agreement (binding affinities all < 100 nm)
+<img width="1434" alt=" high inter-algorithm agreement" src="https://github.com/user-attachments/assets/d628c5df-c5c8-4b43-8a1d-b9ec684746ec" />
 
 Example with low inter-algorithm agreement (binding affinities range from ~ 300 - 10 , 000 nm)
+<img width="1447" alt="low inter-algorithm agreement" src="https://github.com/user-attachments/assets/8d8e85b5-c0b5-42aa-aaea-cab4b0b4d7ba" />
 
 **Processing (aka elution) Algorithm Scores**
 
@@ -516,29 +503,8 @@ class I/II targets. Multiple distinct entries may be created in the peptide orde
 distinct synthesis attempts needed to incorporate each into the final design.
 
 Example of a long frameshift peptide sequence (qualifying class I peptide regions in red):
+<img width="928" alt="frameshift" src="https://github.com/user-attachments/assets/60b0e1d7-a84a-48b1-b48c-c7e81d57cc81" />
 
-# RQKGSYLTHEASGLDEQGEAREAFLKAATDTRGKRNSSSDPIPTPGLGLGLGWGPPHCQLQ
-
-##### GTSKDIYQSLGWWASPPTTNTSDAWAGMGVLDAWISVRARSEGPEVWVPQGAGAKGPDPPS
-
-##### PVRAVGIGLGEDNWGKARAPRLQNQVLWGGGQFLGRVGGAGKGNTDFFGGPRP
-
-Proposed candidates:
-LTHEASGLDEQGEAREAFLKAATDTRGKRNSSSDPIPTPGLGLGLGWGPPH
-SSDPIPTPGL - 105. 8 nM - HLA-C* 05 : 01
-IPTPGLGLGL - 185. 9 nM - HLA-B* 07 : 02
-IPTPGLGL - 399. 79 nM - HLA-B* 07 : 02
-
-QLQGTSKDIYQSLGWWASPPTTNTSDAWAGMGVLDAWISVRARSEGPEVWV
-SLGWWASPPT - 281. 71 nM - HLA-A* 02 : 01
-TSDAWAGMGV - 358. 64 nM - HLA-C* 05 : 01
-TSDAWAGMGVL - 414. 48 nM - HLA-C* 05 : 01
-
-TTNTSDAWAGMGVLDAWISVRARSEGPEVWVPQGAGAKGPDPPSPVRAVGI
-GVLDAWISV - 39. 04 nM - HLA-A* 02 : 01
-VLDAWISVRA - 425. 57 nM - HLA-A* 02 : 01
-RARSEGPEV - 428. 96 nM - HLA-B* 07 : 02
-RSEGPEVWV - 434. 65 nM - HLA-C* 05 : 01
 
 **Dinucleotide mutations**
 
@@ -552,7 +518,7 @@ in IGV can be used to determine the correct VAF.
 **Anchor Heatmap examination**
 
 The anchor heatmap visualization provided in pVACview reflects an analysis approach
-previously described and published (Xia, et al. Science Immunology, 2023 ). A systematic
+previously described and published ([Xia, et al. Science Immunology, 2023](https://www.science.org/doi/10.1126/sciimmunol.abg2200). A systematic
 computational analysis was performed to determine for each HLA allele, what positions of that
 allele act to anchor the peptide to the MHC binding groove. Conventional rule of thumb
 approaches may consider the first and last few amino acids to be anchoring and the “center” of
@@ -577,6 +543,7 @@ all other criteria are met). If the mutant is not at an anchor position, the wil
 binding/presentation may be ignored. Additional extensive descriptions of this assessment can
 be found in the pvactools and pvacview documentation.
 
+<img width="846" alt="Anchor heatmap" src="https://github.com/user-attachments/assets/2e442523-6f27-4733-8489-ee8bad31251f" />
 
 ## Genomics Review (post ITB meeting)
 
@@ -585,11 +552,6 @@ genomics review of all candidates must be completed following the procedures and
 out below.
 
 ## Example Location of Files Needed for Genomics Review
-
-Using case **5120 - 19** as an example:
-
-/storage 1 /fs 1 /gillandersw/Active/Project_ 0001 _Clinical_Trials/pancreas_leidos/analysis/TWJF- 5
-120 - 19 /gcp_immuno/final_results/
 
 **Variants Review Files**
 
@@ -690,6 +652,8 @@ The following subset of QC values can be obtained from the FDA report tables gen
 pipeline and used to determine whether the case meets basic data quality criteria as described
 in documentation provided to the FDA.
 
+<img width="666" alt="FDA Quality Thresholds" src="https://github.com/user-attachments/assets/af81ee46-3fc1-4c6b-8d7c-c25bda2a71b8" />
+
 **Tumor type / driver variant review**
 
 Given the reported tumor type do we see evidence for expected somatic driver variants?
@@ -698,11 +662,11 @@ possible red flag. This review can be conducted in pVACview with CancerGeneCensu
 loaded.
 
 Other strategies for assessing drivers:
-● Use the variants TSV file and select all variant types that would directly impact protein
+- Use the variants TSV file and select all variant types that would directly impact protein
 sequence
-● Look for variants previous observed in COSMIC or pathogenic according to ClinVar
-● Intersect the genes with these mutations with Cancer Gene Census
-● Take the candidate genes that result from the previous two queries and search for these
+- Look for variants previous observed in COSMIC or pathogenic according to ClinVar
+- Intersect the genes with these mutations with Cancer Gene Census
+- Take the candidate genes that result from the previous two queries and search for these
 in CBioPortal after selecting studies that match the cancer type of the patient
 
 **HLA allele review for sample/data mixup**
