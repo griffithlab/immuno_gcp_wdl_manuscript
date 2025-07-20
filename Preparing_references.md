@@ -1,19 +1,12 @@
 # Preparing References README
 
-There are dozens of input files needed for these pipelines.  These include things like reference genomes, aligner indices, gene annotations, and known variants.   This guide aims to be a comprehensive walkthrough of where to find those files and/or how to create them. Code snippets are included for human, using GRCh38 and Ensembl version 113. 
+There are dozens of input files needed for these pipelines.  These include things like reference genomes, aligner indices, gene annotations, and known variants.   This guide aims to be a comprehensive walkthrough of where to find those files and/or how to create them. Code snippets are included for human build GRCh38 and Ensembl version 113. 
 
-To create these files yourself, follow the links below, each labelled with key pipelines for which they're needed-
-
-* Alignment
-* Germline variant calling
-* Somatic variant calling (exome/WGS)
-* RNAseq (bulk)
 
 Before running any snippets, make a directory where you'd like this cache to be stored, and set the `BASEDIR` variable to point to it:
 
 ```
-#BASEDIR=/path/to/annotation_data_grch38_ens113
-BASEDIR=/storage1/fs1/mgriffit/Active/griffithlab/gc2596/k.singhal/immuno_manuscript/preparing_references/annotation_data_grch38_ens113
+BASEDIR=/path/to/annotation_data_grch38_ens113
 ```
 
 ## Reference genome 
@@ -140,7 +133,6 @@ from the `google/cloud-sdk` image:
 ```
 mkdir $BASEDIR/known_variants
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf $BASEDIR/known_variants 
-TODO BGZIP THIS VCF AND TABIX
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz $BASEDIR/known_variants
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi $BASEDIR/known_variants
 gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz $BASEDIR/known_variants
@@ -185,18 +177,10 @@ bcftools index -t gnomad.genomes.v3.1.2.concatenated.vcf.bgz
 bcftools view -i 'INFO/AF[0]>0.001' -Oz -o gnomad_b38_exome.vcf.gz gnomad.genomes.v3.1.2.concatenated.vcf.bgz
 bcftools index -t gnomad_b38_exome.vcf.gz
 
-# Step 5: Copy gnomad VCF to knownvariants and optionally delete original folder
+# Step 5: Copy gnomad VCF to known variants and optionally delete original folder
 cp $BASEDIR/known_variants/gnomad_temp/gnomad_b38_exome.vcf.gz* $BASEDIR/known_variants/
 
 ```
-
-Can create a lite version containing the population allele frequencies from the full vcf using using bcftools. Tested using bcftools version 1.9.
-
-```
-# TODO FIGURE OUT WHERE WE WANT TO UPLOAD THESE FILES
-bcftools annotate -x ^INFO/AF,INFO/AF_afr,INFO/AF_amr,INFO/AF_asj,INFO/AF_eas,INFO/AF_fin,INFO/AF_nfe,INFO/AF_oth,INFO/AF_sas --threads $THREADS --output-type z -o $BASEDIR/known_variants/gnomad-lite.genomes.r3.0.sites.vcf.gz $BASEDIR/known_variants/gnomad.genomes.r3.0.sites.vcf.gz 
-```
-
 
 
 #### Common SNPs for somalier concordance 
@@ -250,14 +234,18 @@ grep 'gene_biotype "rRNA"' $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.g
 
 #### AGFusion database
 
+To build the AGFusion database, one can follow the instructions [here](https://github.com/murphycj/AGFusion). However it is also necessary to generate an AGFusion docker image to run in the pipeline, therefore we suggest building a docker image and reference file automatically using the Dockerfile [here](https://github.com/genome/AGFusion/blob/master/Dockerfile) as a reference point, and updating the Ensembl version as desired. 
 ```
-??? Also need a new docker? https://hub.docker.com/r/mgibio/agfusion
+mkdir $BASEDIR/agfusion_1.3_database/
+cd $BASEDIR/agfusion_1.3_database/
+# Pull and run the docker image- ksinghal28/agfusion_ens113
+# Copy the agfusion db file
+cp /opt/agfusiondb/agfusion.homo_sapiens.113.db .
 ```
 
 ## Other
 
 #### Illumina adapters 
-
 
 
 ```
