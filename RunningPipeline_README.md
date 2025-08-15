@@ -96,9 +96,9 @@ cd git
 
 git clone git@github.com:griffithlab/immuno_gcp_wdl_manuscript.git 
 
-git clone –branch v1.3.0 git@github.com:griffithlab/analysis-wdls.git  
+git clone –-branch v1.3.0 https://github.com/wustl-oncology/analysis-wdls.git
 
-git clone --branch v1.4.4 git@github.com:wustl-oncology/cloud-workflows.git
+git clone --branch v1.4.4 https://github.com/wustl-oncology/cloud-workflows.git
 ```
 
 ### Login to GCP and set the desired project
