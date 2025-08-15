@@ -64,16 +64,17 @@ Start by opening a Terminal session on your local system
 The following environment variables are used merely for convenience and should be customized to produce intuitive labeling for your own analysis:
 
 ```bash
-export GCS_PROJECT=test-immuno
+export GCS_PROJECT=test-immuno # REPLACE WITH YOUR PROJECT NAME
 export GCS_SERVICE_ACCOUNT=cromwell-server@$GCS_PROJECT.iam.gserviceaccount.com
 export GCS_BUCKET_NAME=test-immuno-pipeline
 export GCS_BUCKET_PATH=gs://test-immuno-pipeline
-export GCS_INSTANCE_NAME=mg-immuno-test
+export SAMPLE=hcc1395
+export GCS_INSTANCE_NAME=${SAMPLE}-immuno-test
 export WORKING_BASE=~/Desktop/pipeline_test/gcp_wdl_test
 export RAW_DATA_DIR=~/Desktop/pipeline_test/raw_data
 export WORKFLOW_DEFINITION=$WORKING_BASE/git/analysis-wdls/definitions/immuno.wdl
-export LOCAL_YAML=hcc1395_immuno_local-WDL.yaml
-export CLOUD_YAML=hcc1395_immuno_cloud-WDL.yaml
+export LOCAL_YAML=${SAMPLE}_immuno_local-WDL.yaml
+export CLOUD_YAML=${SAMPLE}_immuno_cloud-WDL.yaml
 ```
 
 NOTE: You will need to manually create the Google billing project in the console before proceeding
@@ -93,18 +94,11 @@ The following repositories contain: this tutorial (immuno_gcp_wdl), the WDL work
 mkdir git
 cd git
 
-git clone git@github.com:evelyn-schmidt/immuno_gcp_wdl_manuscript.git 
+git clone git@github.com:griffithlab/immuno_gcp_wdl_manuscript.git 
 
-git clone git@github.com:griffithlab/analysis-wdls.git # (v1.1.4)
-cd analysis-wdls/
-git checkout tags/v1.1.4
-cd ../
+git clone git@github.com:griffithlab/analysis-wdls.git 
 
-git clone git@github.com:griffithlab/cloud-workflows.git # (v1.3.1)
-cd cloud-workflows/
-git checkout tags/v1.3.1
-cd ../
-
+git clone --branch v1.4.4 git@github.com:wustl-oncology/cloud-workflows.git
 ```
 
 ### Login to GCP and set the desired project
@@ -115,35 +109,12 @@ gcloud config set project $GCS_PROJECT
 gcloud config list
 ```
 
-The `gcloud config list` command can be used to remind yourself how you are currently authenticated to use Google Cloud Services. This can be helpful because on your host machine, you will be authenticated using your personal account. However, on the Google VM where the workflow will be orchestrated by Cromwell, you will be authenticated using a "service" account. 
-
-You can create multiple configurations 
-
-```bash
-gcloud config configurations list # see the cofigurations already created
-gcloud config configurations create test # create a new configuration
-
-gcloud info --format='value(config.paths.global_config_dir)' # find where your google cloud configurations settings are stores
-vim /Users/evelynschmidt/.config/gcloud/configurations/config_test # edit 
-```
-
-```
-[core]
-project = test-immuno
-account = evelyn@wustl.edu
-
-[compute]
-zone = us-central1-c
-region = us-central1
-```
-
-
 ### Set up cloud service account, firewall settings, and storage bucket
 Run the following command and make note of the "Service Account" returned (e.g. "cromwell-server@test-immuno.iam.gserviceaccount.com"). Make sure this matches the value in $GCS_SERVICE_ACCOUNT (e.g. `echo $GCS_SERVICE_ACCOUNT`). If the project already exsists you will see errors but as long as the Service Account is returned then everything has executed correclty 
 
 ```bash
 cd $WORKING_BASE/git/cloud-workflows/manual-workflows/
-bash resources.sh init-project --project $GCS_PROJECT --bucket $GCS_BUCKET_NAME # might have to specify ip addresses depending on google cloud bucket permissions
+bash resources.sh init-project --project $GCS_PROJECT --bucket $GCS_BUCKET_NAME # you may have to specify ip addresses depending on google cloud bucket permissions
 ```
 
 This step should have created two new configuration files in your current directory: `cromwell.conf` and `workflow_options.json`.
@@ -154,13 +125,23 @@ Download RAW data for hcc1395
 ```bash
 mkdir -p $RAW_DATA_DIR/hcc1395
 cd $RAW_DATA_DIR/hcc1395
-wget http://genomedata.org/pmbio-workshop/fastqs/all/Exome_Norm.tar
-wget http://genomedata.org/pmbio-workshop/fastqs/all/Exome_Tumor.tar
-wget http://genomedata.org/pmbio-workshop/fastqs/all/RNAseq_Tumor.tar
+wget https://genomedata.org/hcc1395/fastqs/all/Exome_Norm.tar
+wget https://genomedata.org/hcc1395/fastqs/all/Exome_Tumor.tar
+wget https://genomedata.org/hcc1395/fastqs/all/RNAseq_Tumor.tar
 tar -xvf Exome_Norm.tar 
 tar -xvf Exome_Tumor.tar 
 tar -xvf RNAseq_Tumor.tar
 rm -f Exome_Norm.tar Exome_Tumor.tar RNAseq_Tumor.tar
+```
+
+### Create a copy of reference and annotation files in your Google Bucket
+In the following step, we will make a copy of a bundle of reference files from one Public ("Requestor Pays") Google Bucket into our own Google Bucket as follows:
+
+```bash
+gsutil -u $GCS_PROJECT ls gs://griffith-lab-workflow-inputs/
+gsutil -u $GCS_PROJECT cp -r gs://griffith-lab-workflow-inputs/human_GRCh38_ens105 $GCS_BUCKET_PATH/human_GRCh38_ens105
+gsutil ls $GCS_BUCKET_PATH/human_GRCh38_ens105
+
 ```
 
 ### Obtain an example configuration (YAML) file on local system
@@ -174,26 +155,14 @@ cd yamls
 
 Setup yaml files for an example run.
 ```bash
-cp $WORKING_BASE/git/immuno_gcp_wdl_local/example_yamls/human_GRCh38_ens105/hcc1395_immuno_local-WDL.yaml $WORKING_BASE/yamls/
+cp $WORKING_BASE/git/immuno_gcp_wdl_local/example_yamls/human_GRCh38_ens105/${LOCAL_YAML} $WORKING_BASE/yamls/
 ```
 
-Note that this YAML file has been set up to work with the HCC1395 raw data files downloaded above. You will need to update the PATHs to the FASTQ files to match the locations you downloaded them to above.
+Note that this YAML file has been set up to work with the HCC1395 raw data files downloaded above. You will need to update the PATHs to the FASTQ files to match the locations you downloaded them to above. You will also need to replace `[REFERENCE DIR PATH]` in the YAML to match the location of your newly created/copied reference directory. 
 
 Open the YAML file with an editor and correct all 8 lines that contain paths to input data FASTQ files.
 
 If you are modifying this tutorial to work with your own data, you will need to modify the YAML lines that relate to input sequence files.  For both DNA and RNA files, both FASTQ and Unaligned BAM files are supported as input.  Similarly, you have have your data in one file (or one file pair) or you may have multiple data files that will be merged together. Depending on how your input data is organized the YAML entries will look slightly different.
-
-### Create a copy of reference and annotation files in your Google Bucket
-In the following step, we will make a copy of a bundle of reference files from one Public ("Requestor Pays") Google Bucket into our own Google Bucket as follows:
-
-```bash
-gsutil -u $GCS_PROJECT ls gs://griffith-lab-workflow-inputs/
-gsutil -u $GCS_PROJECT cp -r gs://griffith-lab-workflow-inputs/human_GRCh38_ens105 $GCS_BUCKET_PATH/human_GRCh38_ens105
-gsutil ls $GCS_BUCKET_PATH/human_GRCh38_ens105
-
-```
-
-Note that in the commands above, we must use the `-u` option to specify a project for billing to access a public Google Bucket configured as "Requestor Pays".
 
 ### Stage input data files to cloud bucket
 
@@ -203,7 +172,7 @@ Start an interactive docker session capable of running the "cloudize" scripts. N
 
 ```bash
 docker pull mgibio/cloudize-workflow:latest
-docker run -it --env GCS_PROJECT --env GCS_BUCKET_NAME --env GCS_BUCKET_PATH --env GCS_INSTANCE_NAME --env GCS_SERVICE_ACCOUNT --env WORKING_BASE --env WORKFLOW_DEFINITION --env LOCAL_YAML --env CLOUD_YAML -v /Users/mgriffit/Desktop/pipeline_test/:/Users/mgriffit/Desktop/pipeline_test/ -v /Users/mgriffit/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
+docker run -it --env GCS_PROJECT --env GCS_BUCKET_NAME --env GCS_BUCKET_PATH --env GCS_INSTANCE_NAME --env GCS_SERVICE_ACCOUNT --env WORKING_BASE --env WORKFLOW_DEFINITION --env LOCAL_YAML --env CLOUD_YAML -v $PWD:$PWD -v ~/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
 ```
 
 Attempt to cloudize your workflow and inputs
@@ -274,10 +243,14 @@ submit_workflow /shared/analysis-wdls/definitions/immuno.wdl $CLOUD_YAML
 
 ### Monitor progress of the workflow run:
 
-While the job is running you can see Cromwell logs live as they occur by doing this
+While the job is running you can see Cromwell logs live as they occur by running this command-
 ```bash
 journalctl -f -u cromwell
 
+```
+Once a run has completed successfully, the end of the log file will display a message similar to-
+```
+Jul 31 16:54:00 hcc1395-immuno-test java[1739]: 2025-07-31 16:54:00 cromwell-system-akka.dispatchers.engine-dispatcher-9995 INFO  - WorkflowManagerActor: Workflow actor for 9c706ccd-4047-4f31-8927-5f0fec558156 completed with status 'Succeeded'. The workflow will be removed from the workflow store.
 ```
 
 ### Save information about the workflow run itself - Timing Diagram and Outputs List
@@ -324,7 +297,7 @@ On compute1 cluster, jump into a docker container with the script available
 ```bash
 export WORKFLOW_ID=<id from above>
 
-docker run -it --env WORKFLOW_ID --env GCS_BUCKET_PATH --env WORKING_BASE -v /Users/mgriffit/Desktop/pipeline_test/:/Users/mgriffit/Desktop/pipeline_test/ -v /Users/mgriffit/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
+docker run -it --env WORKFLOW_ID --env GCS_BUCKET_PATH --env WORKING_BASE -v $PWD:$PWD -v ~/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
 
 ```
 
@@ -354,7 +327,7 @@ On compute1 cluster, start an interactive docker session as describe below and t
 ```bash
 export WORKFLOW_ID=<id from above>
 
-docker run -it --env WORKFLOW_ID --env GCS_BUCKET_PATH --env WORKING_BASE -v /Users/mgriffit/Desktop/pipeline_test/:/Users/mgriffit/Desktop/pipeline_test/ -v /Users/mgriffit/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
+docker run -it --env WORKFLOW_ID --env GCS_BUCKET_PATH --env WORKING_BASE -v $PWD:$PWD -v ~/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
 
 cd $WORKING_BASE/git/cloud-workflows/scripts
 python3 estimate_billing.py $WORKFLOW_ID $GCS_BUCKET_PATH/workflow_artifacts/$WORKFLOW_ID/metadata/
