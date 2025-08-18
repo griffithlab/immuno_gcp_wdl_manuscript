@@ -4,7 +4,20 @@ Here we will give examples of problems that you may encounter during the ITB and
 
 ## TODO- NEED TO ADD SOME TROUBLESHOOTING EXAMPLES FOR FAILURES IN THE PIPELINE RUN ITSELF. (mentioning some general ideas here)
 
-2. Cromwell logging is difficult to parse, so there is not a single good way to troubleshoot a run failure. However, a good place to start is looking if there is a message pointing the user to a stderr log file from a step. 
+2. Cromwell logging is difficult to parse, so there is not a single good way to troubleshoot a run failure. However, a good place to start is looking if there is a message pointing the user to a stderr log file from a step.
+
+An error from JLF 132 where the sample ID was wrong (i think that is what causes this error)
+```
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]: 2025-08-18 17:57:45 cromwell-system-akka.dispatchers.engine-dispatcher-7117 INFO  - WorkflowManagerActor: Workflow ba1ded49-c6b4-42cf-8127-aa0d51ff0883 failed (during ExecutingWorkflowState): Job filterVcf.filterVcfDepth:NA:3 exited with return code 1 which has not been declared as a valid return code. See 'continueOnReturnCode' runtime attribute for more details.
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]: Check the content of stderr for potential additional information: gs://jlf-100-132/cromwell-executions/immuno/ba1ded49-c6b4-42cf-8127-aa0d51ff0883/call-somaticExome/somaticExome/b1985ce0-ded1-4376-a6bb-82c2fe159fe0/call-detectVariants/detectVariants/20e4c9ce-4441-4a83-bc71-213f8c40a6be/call-filterVcf/filterVcf/bb128705-b12b-428a-a80e-5ccd48061891/call-filterVcfDepth/attempt-3/stderr.
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]:  [First 3000 bytes]:Traceback (most recent call last):
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]:   File "/usr/bin/depth_filter.py", line 105, in <module>
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]:     main()
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]:   File "/usr/bin/depth_filter.py", line 93, in main
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]:     elif(depth < args.minimum_depth):
+Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]: TypeError: '<' not supported between instances of 'NoneType' and 'int'
+Aug 18 17:57:49 eve-immuno-jlf-100-132 java[1710]: 2025-08-18 17:57:49 cromwell-system-akka.dispatchers.engine-dispatcher-7125 INFO  - WorkflowManagerActor: Workflow actor for ba1ded49-c6b4-42cf-8127-aa0d51ff0883 completed with status 'Failed'. The workflow will be removed from the workflow store.
+```
 
 ## YAML Checker Scripts
 Most common errors related to user error when generating the YAML file. Check:
