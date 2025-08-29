@@ -1,6 +1,6 @@
-# Manual Review README
+# Immunogenomics Review 
 
-## Add something about running pVACvector
+The purpose of the immmunogenomics review is to confirm that the results of the computational pipline are correct and reasonable. This process involves checking if the output contains the correct files, reviewing quality control (qc) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools, IGV and pVACview, to manually verify the neoantigen candidates.These steps assure that the neantigen candidates of interest are of the highest confidence.
 
 ## Initial review of Immuno Pipeline Outputs
 
@@ -635,13 +635,14 @@ amplification of the same source DNA fragment).
 example, the
     - Detected strand file: qc/tumor_rna/trimmed_read_ 1 strandness_check.txt
     - YAML file: `workflow_artifacts/$case_immuno_cloud-WDL.yaml` (grep for “strand”)
+    - See further help on the [Troubleshooting README](https://github.com/griffithlab/immuno_gcp_wdl_manuscript/blob/main/Troubleshooting_README.md)
 - Summarize total variants called and total neoantigen variants called (i.e. the subset
 of variants that could lead to neoantigens). Briefly, total variants is how many somatic
 mutations were detected in the tumor. Total neoantigen variants is the subset of these
 that lead to possible neoantigen candidates (i.e. those that cause protein coding
 changes in known genes). Note that the number of neoantigen candidates selected by
 the Immunotherapy Tumor Board will be a small subset of this number.
-    - **Total variants** called can be obtained from `variants.final.annotated.tsv` (previously
+    - **Total variants** called can be obtained from `variants.final.ansnotated.tsv` (previously
     `pvacseq.annotated.tsv`). Simply the number of rows in this file minus the header.
     - **Total neoantigen variants** called can be obtained from pVACview (total candidates)
     or by looking at the pVACseq aggregated report file to get this number.
@@ -896,6 +897,45 @@ exon-exon junctions of the fusion). If the fusion support is acceptable (ideally
 expression), examine pVACfuse results to determine if any high quality neoantigens are
 predicted.
 
+### Fusion Review
+Open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion would be one with 
+- Junction reads + Spanning read counts > 5 and junction reads >= 1
+- The fusion is not a read-through
+  - Left Chr and Right Chr are different OR chromosome are the same BUT Left Strand and Right Strand are different OR chromosome and strand are the same BUT ABS(Left Pos - Right Pos) < 1,000,000 OR Fusion GeneA Name OR Fusion GeneB Name matches a known fusion driver gene
+- The fusion has large anchor support 
+
+We have created [fusion review scripts](https://github.com/kcotto/fusion_review_initial/tree/main) that pull our fusions from the above-listed criteria. 
+**SHOULD WE INCLUDE THE REVIEW SCRIPTS? what do you do next? -- test for binding?? Run pvacfuse??**
+
+
+#### Example: GMB119
+<img width="1706" alt="GMB119 fusion inspector" src="https://github.com/user-attachments/assets/cbb288bd-066c-4640-8363-bb47b9df1f4e" />
+
+The PLCG1::LEUTX fusion candidate mentioned above is predicted to produce two possible transcript fusions:
+
+211.PLCG1_LEUTX.ENST00000244007_ENST00000638280.inframe_fusion.72
+210.PLCG1_LEUTX.ENST00000244007_ENST00000396841.frameshift_fusion.72
+
+<img width="1507" alt="GBM119 fusion binding" src="https://github.com/user-attachments/assets/93cb366e-16e4-42db-8ecc-6a7fbf00d3c7" />
+
+The frameshift version is not predicted to lead to a good class I peptide, but the inframe version is predicted to give rise to the following peptide with a percentile rank of 2.3% (for HLA-C*08:02).  IGV review of the fusion breakpoints suggests strong support (from soft-clipped reads) on both sides of the fusion in all three tumor regions samples. 
+
+Best peptide: GADKIEGAK 
+
+The fusion CDS sequence from FusionInspector is:
+MAGAASPCANGCGPGAPSDAEVLHLCRSLEVGTVMTLFYSKKSQRPERKTFQVKLETRQITWSRGADKIEGAKGPRRYRRPRTRFLSKQLTALRELLEKTMHPSLATMGKLASKLQLDLSVVKIWFKNQRAKWKRQQRQQMQTRPSLGPANQTTSVKKEETPSAITTANIRPVSPGISDANDHDLREPSGIKNPGGASASARVSSWDSQSYDIEQICLGASNPPWASTLFEIDEFVKIYDLPGEDDTSSLNQYLFPVCLEYDQLQSSV*
+
+While the fusion is certainly compelling, the best peptide spans the fusion breakpoint by only a single amino acid. “GADKIEGA” match the wild type PLCG1 sequence. The first amino acid on the LEUTX side, an “E” becomes “K” in the fusion product.  The rest of the sequence from that point is wildtype LEUTX sequence. In other words the amino acid sequence largely presented to the TCR is mostly just wild type PLCG1 sequence.  
+
+MT peptide: GADKIEGAK vs. WT peptide: GADKIEGAE
+
+The mutant and wild type versions of this peptide are not predicted to differ significantly in their binding/presentation.  For this reason, this fusion sequence is not a good candidate. 
+
+#####  Further examples:
+https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html
+
+
+
 **Neoantigen Candidates from Tumor Specific RNA Splicing Events**
 A conservative approach to identifying splice neoantigens is to investigate splicing variants that
 impact canonical splice acceptor or donor sites (cis regulatory splice variants). In order to
@@ -946,3 +986,9 @@ The output of pVACvector can be used as input for a DNA, mRNA or adenovirus vacc
 delivery platform.
 
 
+
+
+# Things to ADD
+## Add something about running pVACvector
+## Fusion Review
+## splce mutations?

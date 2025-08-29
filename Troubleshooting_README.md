@@ -2,11 +2,61 @@
 
 Here we will give examples of problems that you may encounter during the ITB and immunogenomics review process
 
-## TODO- NEED TO ADD SOME TROUBLESHOOTING EXAMPLES FOR FAILURES IN THE PIPELINE RUN ITSELF. (mentioning some general ideas here)
 
-2. Cromwell logging is difficult to parse, so there is not a single good way to troubleshoot a run failure. However, a good place to start is looking if there is a message pointing the user to a stderr log file from a step.
+## YAML Issues
 
-An error from JLF 132 where the sample ID was wrong (i think that is what causes this error)
+The most common problem that you can encounter is an error in the YAML file you created. 
+
+- file paths being wrong
+- not matching sample IDS
+- strand setting (this won't mess up the pipleine but it will mess up results)
+
+We created a yaml checker script to help catch these small, but consequential errors. 
+   
+```bash
+docker run -it --env HOME --env GCS_CASE_NAME -v $HOME/:$HOME/ -v /shared/:/shared/ -v $HOME/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
+
+cd $HOME/yamls
+
+python3 /opt/scripts/validate_immuno_yaml.py ${GCS_CASE_NAME}_immuno_cloud-WDL.yaml
+```
+
+## Interpretting the Cromwell Log
+
+If the YAML file has been double-checked and confirmed correct, then it is time to further investigate the cromwell logging file. 
+
+To view the entire cromwell file use this command:
+```bash
+journalctl -u cromwell
+```
+
+Start at the bottom of the file where there should be a line which looks like:
+
+```
+Aug 18 17:57:49 [VM NAME] java[1710]: 2025-08-18 17:57:49 cromwell-system-akka.dispatchers.engine-dispatcher-7125 INFO  - WorkflowManagerActor: Workflow actor for [WORKFLOW ID] completed with status 'Failed'. The workflow will be removed from the workflow store.
+```
+
+The error which caused the pipeline to fail is typically within the lines above this. Depending on the tool, the error message display will look different. Note that if you search the file for key words like 'Error' or 'Fail' you will see alot of messages containing phases/command arguments which are to do with error handling. These are not pipeline errors. 
+
+Once you find where the error is located there is usaully some indication of what step the error is coming from. Sometimes the error message printed in the cromwell log file is useful, but often it is neccassary to find the stderr file for the task which the error is coming from. Ususally there is a line before the error that looks like this: 
+
+```Aug 18 17:57:45 [VM NAME] java[1710]: Check the content of stderr for potential additional information: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-somaticExome/somaticExome/[UNIQUE SUB WORKFLOW ID]/call-detectVariants/detectVariants/[UNIQUE SUB WORKFLOW ID 2]/call-filterVcf/filterVcf/[UNIQUE SUB WORKFLOW ID 23]/call-filterVcfDepth/attempt-3/stderr.```
+
+The error files for all individual tasks are located in the google bucket you designated your results to go to. Simply follow the path located in the error file to that stderr and view it on the web browser. Often times the errors located in this file are much more interpretable and will lead to a conclusion about what the problem is. 
+
+However, if the error is still not intreptable, we begin to do a traceback of pipeline tasks to identify where exactly the problem occured. In the same folder as the stderr file, explore the other files in the folder like the `stdout`, `log`, or `script`. The `script` file will let you know what command was run and inputs needed for that command. Make sure the inputs look correct. Some common things we have seen are the input files are empty or incredible small, indicating that a process was not completed correctly or was interrupted. 
+
+Note: If the `call-caching` was used, if you resubmitted a workflow on the same VM, there might be a `place_holder.txt` that indicated where the data is being pulled (cahced) from. The file will look like this:
+
+```
+This directory does not contain any output files because this job matched an identical job that was previously run, thus it was a cache-hit.
+Cromwell is configured to not copy outputs during call caching. To change this, edit the filesystems.gcs.caching.duplication-strategy field in your backend configuration.
+The original outputs can be found at this location: gs://jlf-100-037/cromwell-executions/immuno/598fac4f-d678-49f6-a8a7-cbc9cb7adcc9/call-rna/rnaseqStarFusion/07a05ef5-4fd7-4ba2-8474-3189ad246480/call-kallisto
+```
+
+It might be useful to run a step separetly from the rest of the pipeline to try and isolate the issue further. Using the `script` file and the docker from the 
+
+### Example: Sample IDs Not Matching
 ```
 Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]: 2025-08-18 17:57:45 cromwell-system-akka.dispatchers.engine-dispatcher-7117 INFO  - WorkflowManagerActor: Workflow ba1ded49-c6b4-42cf-8127-aa0d51ff0883 failed (during ExecutingWorkflowState): Job filterVcf.filterVcfDepth:NA:3 exited with return code 1 which has not been declared as a valid return code. See 'continueOnReturnCode' runtime attribute for more details.
 Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]: Check the content of stderr for potential additional information: gs://jlf-100-132/cromwell-executions/immuno/ba1ded49-c6b4-42cf-8127-aa0d51ff0883/call-somaticExome/somaticExome/b1985ce0-ded1-4376-a6bb-82c2fe159fe0/call-detectVariants/detectVariants/20e4c9ce-4441-4a83-bc71-213f8c40a6be/call-filterVcf/filterVcf/bb128705-b12b-428a-a80e-5ccd48061891/call-filterVcfDepth/attempt-3/stderr.
@@ -18,57 +68,40 @@ Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]:     elif(depth < args.minimum
 Aug 18 17:57:45 eve-immuno-jlf-100-132 java[1710]: TypeError: '<' not supported between instances of 'NoneType' and 'int'
 Aug 18 17:57:49 eve-immuno-jlf-100-132 java[1710]: 2025-08-18 17:57:49 cromwell-system-akka.dispatchers.engine-dispatcher-7125 INFO  - WorkflowManagerActor: Workflow actor for ba1ded49-c6b4-42cf-8127-aa0d51ff0883 completed with status 'Failed'. The workflow will be removed from the workflow store.
 ```
+### Space Issue
 
-## YAML Checker Scripts
-Most common errors related to user error when generating the YAML file. Check:
-- cloud YAML file after cloudize workflows to make sure that all the file paths are in the google cloud bucket
-- that all the files got uploaded
-- check that the sample name in the readgroup is identical to the sample name in the field below.
-   
-```bash
-# download python script
-gsutil cp gs://jlf-rcrf-immuno-outputs/annotation_igv/validate_immuno_yaml.py .
-
-# run script (might take a few minutes depending on number of files it has to check)
-docker run -it --env HOME -v $PWD/:$PWD/ -v $HOME/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest python3 $HOME/validate_immuno_yaml.py $HOME/yamls/${GCS_CASE_NAME}_immuno_cloud-WDL.yaml
 ```
+Jan 29 21:36:11 eve-immuno-jlf-100-082 java[12798]: 2025-01-29 21:36:11,916 cromwell-system-akka.dispatchers.engine-dispatcher-22396 INFO  - WorkflowManagerActor: Workflow 9e157c36-5ce7-42f4-8f16-6c1031486475 failed (during ExecutingWorkflowState): java.lang.Exception: Task mutect.mutectTask:24:4 failed. The job was stopped before the command finished. PAPI error code 10. The assigned worker has failed to complete the operation
+
+Jan 29 21:36:11 eve-immuno-jlf-100-082 java[12798]: java.lang.Exception: Task mutect.mutectTask:3:4 failed. Job exit code 247. Check gs://jlf-rcrf-immuno-outputs/cromwell-executions/immuno/9e157c36-5ce7-42f4-8f16-6c1031486475/call-somaticExome/somaticExome/c822eef7-65c8-4660-8d39-a2afe1ebc6d0/call-detectVariants/detectVariants/43b22f5f-7b8f-4250-81ce-c28c806d5a4b/call-mutect/mutect/52f34299-cd9b-427f-97e5-6f997f7ee85c/call-mutectTask/shard-3/attempt-4/stderr for more information. PAPI error code 9. Please check the log file for more details: gs://jlf-rcrf-immuno-outputs/cromwell-executions/immuno/9e157c36-5ce7-42f4-8f16-6c1031486475/call-somaticExome/somaticExome/c822eef7-65c8-4660-8d39-a2afe1ebc6d0/call-detectVariants/detectVariants/43b22f5f-7b8f-4250-81ce-c28c806d5a4b/call-mutect/mutect/52f34299-cd9b-427f-97e5-6f997f7ee85c/call-mutectTask/shard-3/attempt-4/mutectTask-3.log.
+```
+
+## Google Cloud Errors
+
+### Bucket permissions
+
+```
+Aug 05 15:59:34 sidi-immuno-jlf-100-128 java[1744]: Failed to evaluate input 'data_size' (reason 1 of 1): [Attempted 1 time(s)] - StorageException: cromwell-server@jlf-rcrf.iam.gserviceaccount.com does not have storage.objects.get access to the Google Cloud Storage object. Permission 'storage.objects.get' denied on resource (or it may not exist).
+```
+
+### Google Cloud Outage
+
+```
+Jun 13 03:10:40 eve-immuno-jlf-100-119 java[1788]: We encountered an internal error. Please try again.
+Jun 13 03:10:40 eve-immuno-jlf-100-119 java[1788]: Caused by: java.io.IOException: Could not read from gs://evelyn-jlf-immuno/cromwell-executions/immuno/d05c070f-df
+1c-4917-9d52-545b057c53c2/call-rna/rnaseqStarFusion/
+
+```
+
+
+## Common Problems Encountered During Immunogenomics Review
 
 ### The strand settings
 A typical thing that the qc review can reveal is that the wrong strand setting was used in the yaml file. It is important to know the correct strand setting to determine the expression levels of gene, especially in cases of overlapping genes. So with an unstranded protocol, we do not map RNA reads to DNA by strand information. When the strand protocol is unknown, setting the strand setting in the yaml to unstranded is safest because it essentially does not consider the directionality of the reads during mapping. However, this does result in a loss of information. If you set your yaml to first strand when the protocol is second or unstranded, you could potentially lose whole genes depending on overlap...
 
 **how to manually infer strandedness**
 
-### FDA Thresholds
-
-This is an example of how this data table should look for a very high data quality case. Note that the total reads often fail because the threshold is set at a very high level.
-
-![FDA Quality Thresholds for Leidos-5120-28](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/0850f4d8-192f-4295-8d05-0a9907006ded)
-
-
-This is an example of a case that suffered from low input tumor material, resulting in tumor DNA coverage being deficient and uneven and suffering from a very high duplication rate. This likely contributed to a high false-positive rate with many variants not surviving basic filtering or manual review. Tumor RNA similarly suffered from an apparent high level of genomic contamination. As a result, several prioritized neoantigen candidates failed after dedicated IGV manual review, and the high duplication rate created situations where all variant support came from a set of identical/duplicate read alignments. 
-
-![FDA Quality Thresholds for JLF-100-060](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/7fd55b36-586c-4882-b00e-cab71b8ea94a)
-
-### Basic QC data review
-
-Here is an example (case 5120-18) of a typical qc summary:
-
-```
-normal_dna_aligned_metrics.txt Unique Map Reads: 136,917,036 ( excellent )
-tumor_dna_aligned_metrics.txt Unique Map Reads: 347,318,833 ( excellent )
-tumor_rna_aligned_metrics.txt Unique Map Reads: 183,279,500 ( excellent )
-normal_dna_aligned_metrics.txt Mapped Read Duplication Rate: 12.7410677726806 (%) ( very poor )
-tumor_dna_aligned_metrics.txt Mapped Read Duplication Rate: 13.2917990956679 (%) ( very poor )
-Relatedness: 0.994 ( excellent )
-normal.VerifyBamId.selfSM Contamination: 0.00138 ( good )
-tumor.VerifyBamId.selfSM Contamination: 0.00281 ( good )
-The proportion of RNA reads mapping to cDNA sequence is 0.970317 (coding ( 0.896512 ) + UTR ( 0.073805 ) ( excellent )
-trimmed_read_1strandness_check.txt: Data is likely RF/fr-firststrand
-YAML file: immuno.strand: first
-Total Number of somatic variants called: 67
-```
-
-#### End Bias
+### End Bias
 
 Visually inspect the plot located at `qc/tumor_rna/rna_metrics.pdf`. If the RNA-seq data is of good quality from intact RNA the plot should have a “horseback” shape, representing lower coverage at the beginning and end of transcripts but quickly rising and remaining relatively high over the majority of the transcript positions. RNA-seq data made from highly degraded RNA combined with polyA selection or oligo-dT cDNA priming can have a heavily biased distribution instead. Such data can still produce gene expression estimates but will be unable to effectively verify the expression of somatic variant alleles.
 
@@ -78,10 +111,6 @@ An example of a good end bias plot:
 An example of a poor end-bias plot. This case was run with the yaml set to "unstranded" when the detected strandedness of the RNA data was unstranded. **is this the reson of this plot???**
 ![jlf-100-067 end-bias BAD](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/649f9477-2d85-450c-8257-282c3be60abf)
 
-### HLA Allele Review
-Make sure the HLA alleles that are being used in pVACview for the final selection of candidates match up with those expected for the case based on Optitype/PHLAT predictions from the data and clinical HLA typing results if available. Check whether the HLA alleles predicted for normal and tumor samples are in agreement.  Note any discrepancies.
-
-Check the files in the location `gcp_immuno/final_results/hla_typing`. Make sure optitype_tumor_result.tsv and opitype_normal_result.tsv are the same, phlat_normal_HLA.sum and phlat_tumor_HLA.sum are the same. And all these calls match hla_calls.txt.
 
 ###  Assessing Read quality
 
@@ -112,45 +141,8 @@ A really detailed description on exploring a germline varaint in 5120-18
 
 ### Alterations to best peptide that needs reanalysis of binding
 
-### Fusion Review
-Open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion would be one with 
-- Junction reads + Spanning read counts > 5 and junction reads >= 1
-- The fusion is not a read-through
-  - Left Chr and Right Chr are different OR chromosome are the same BUT Left Strand and Right Strand are different OR chromosome and strand are the same BUT ABS(Left Pos - Right Pos) < 1,000,000 OR Fusion GeneA Name OR Fusion GeneB Name matches a known fusion driver gene
-- The fusion has large anchor support 
-
-We have created [fusion review scripts](https://github.com/kcotto/fusion_review_initial/tree/main) that pull our fusions from the above-listed criteria. 
-**SHOULD WE INCLUDE THE REVIEW SCRIPTS? what do you do next? -- test for binding?? Run pvacfuse??**
-
-
-#### Example: GMB119
-<img width="1706" alt="GMB119 fusion inspector" src="https://github.com/user-attachments/assets/cbb288bd-066c-4640-8363-bb47b9df1f4e" />
-
-The PLCG1::LEUTX fusion candidate mentioned above is predicted to produce two possible transcript fusions:
-
-211.PLCG1_LEUTX.ENST00000244007_ENST00000638280.inframe_fusion.72
-210.PLCG1_LEUTX.ENST00000244007_ENST00000396841.frameshift_fusion.72
-
-<img width="1507" alt="GBM119 fusion binding" src="https://github.com/user-attachments/assets/93cb366e-16e4-42db-8ecc-6a7fbf00d3c7" />
-
-The frameshift version is not predicted to lead to a good class I peptide, but the inframe version is predicted to give rise to the following peptide with a percentile rank of 2.3% (for HLA-C*08:02).  IGV review of the fusion breakpoints suggests strong support (from soft-clipped reads) on both sides of the fusion in all three tumor regions samples. 
-
-Best peptide: GADKIEGAK 
-
-The fusion CDS sequence from FusionInspector is:
-MAGAASPCANGCGPGAPSDAEVLHLCRSLEVGTVMTLFYSKKSQRPERKTFQVKLETRQITWSRGADKIEGAKGPRRYRRPRTRFLSKQLTALRELLEKTMHPSLATMGKLASKLQLDLSVVKIWFKNQRAKWKRQQRQQMQTRPSLGPANQTTSVKKEETPSAITTANIRPVSPGISDANDHDLREPSGIKNPGGASASARVSSWDSQSYDIEQICLGASNPPWASTLFEIDEFVKIYDLPGEDDTSSLNQYLFPVCLEYDQLQSSV*
-
-While the fusion is certainly compelling, the best peptide spans the fusion breakpoint by only a single amino acid. “GADKIEGA” match the wild type PLCG1 sequence. The first amino acid on the LEUTX side, an “E” becomes “K” in the fusion product.  The rest of the sequence from that point is wildtype LEUTX sequence. In other words the amino acid sequence largely presented to the TCR is mostly just wild type PLCG1 sequence.  
-
-MT peptide: GADKIEGAK vs. WT peptide: GADKIEGAE
-
-The mutant and wild type versions of this peptide are not predicted to differ significantly in their binding/presentation.  For this reason, this fusion sequence is not a good candidate. 
-
-#####  Further examples:
-https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html
-
-
 ### Other Examples -- TO REPLACE LATER
+
 ### Framshift miscount
 
 Leidos 5120-19 - RNA counts were corrected for two single base insertions showing that their expression was indeed supported despite initially having RNA VAFs of 0%: HES1 FS46 and RREB1	FS781-782
@@ -224,6 +216,7 @@ We also examined a fusion prediction for KDM5C::KMT2C which had 34 junction read
 
 ##### Leidos 5120-29 
 SLC1A7 candidate (original status: Review) was dropped during the manual review. Short explanation: the Class I peptide which doesnt have reference match has bad binding affinity, Class II peptide has reference match. Long explanation: This candidate has 2 transcript sets (ENST00000620347.5 and ENST00000371494.9) , both transcript sets have a matched portion (LQALLIVL) with proteome reference. Class II peptide (QALLIVLATSSSSA, from ENST00000371494.9) has a complete overlap with the reference, thus was rejected. Class I peptide for HLA-C*03:04 (VLATSSSSATL, from ENST00000371494.9) can still be used (if we cut the 51 mer to exclude the reference match portion), however this peptide is a bad binder (median IC50 greater than 2,000 nM, with multiple algorithms reports high IC50). Class I peptide for HLA-A (ILQALLIVL from ENST00000620347.5) has good binding affinity but has a strong reference match.  
+
 
 
 
