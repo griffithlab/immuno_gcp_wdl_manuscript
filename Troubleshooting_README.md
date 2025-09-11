@@ -37,6 +37,7 @@ To view the entire cromwell file use this command:
 ```bash
 journalctl -u cromwell
 ```
+### Locate Error
 
 Start at the bottom of the file where there should be a line which looks like:
 
@@ -52,6 +53,8 @@ Once you find where the error is located there is usaully some indication of wha
 Aug 18 17:57:45 [VM NAME] java[1710]: Check the content of stderr for potential additional information: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-somaticExome/somaticExome/[UNIQUE SUB WORKFLOW ID]/call-detectVariants/detectVariants/[UNIQUE SUB WORKFLOW ID 2]/call-filterVcf/filterVcf/[UNIQUE SUB WORKFLOW ID 23]/call-filterVcfDepth/attempt-3/stderr.
 ```
 
+### Investigate stderr file located in the Google Bucket
+
 The error files for all individual tasks are located in the google bucket you designated your results to go to. Simply follow the path located in the error file to that stderr and view it on the web browser. Often times the errors located in this file are much more interpretable and will lead to a conclusion about what the problem is. 
 
 However, if the error is still not intreptable, we begin to do a traceback of pipeline tasks to identify where exactly the problem occured. In the same folder as the stderr file, explore the other files in the folder like the `stdout`, `log`, or `script`. The `script` file will let you know what command was run and inputs needed for that command. Make sure the inputs look correct. **Some common things we have seen are the input files are empty or incredible small, indicating that a process was not completed correctly or was interrupted.**
@@ -64,7 +67,64 @@ Cromwell is configured to not copy outputs during call caching. To change this, 
 The original outputs can be found at this location: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-rna/rnaseqStarFusion//[UNIQUE SUB WORKFLOW ID]/call-kallisto
 ```
 
-It might be useful to run a step separetly from the rest of the pipeline to try and isolate the issue further. Using the `script` file and the docker from the 
+### Running a step indepentently 
+It might be useful to run a step separetly from the rest of the pipeline to try and isolate the issue further. Using the `script` file and the docker from the WDL where that steps instructions are specfied, you can try and manually rerun the step on VM to try and understand what is failing. 
+
+For example, if we were getting an error during the opitype step, we could find the `script` file used for opitype:
+
+```
+gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-optitype/script
+```
+
+Where we can see the command to execute Opitype and the files needed:
+```
+/bin/bash /usr/bin/optitype_script_wdl.sh /tmp . \
+optitype_tumor /mnt/disks/cromwell_root/[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-somaticExome/somaticExome/[UNIQUE SUB WORKFLOW ID 1]/call-tumorIndexCram/tumor.cram /mnt/disks/cromwell_root/[GCS REFERENCE FILES BUCKET]/human_GRCh38_ens105/aligner_indices/bwamem2_2.2.1/all_sequences.fa 8 50
+```
+Find the WDL where the opitype execution command is located. All the specifications for running indvidiaul tools are located at within the definitions/tools/ directory. So opitype is located at `definitions/tools/optitype_dna.wdl`. Here we can find the docker: `mgibio/immuno_tools-cwl:1.0.2`
+
+Now we have everything we need to rerun the opitype command, independent from the rest of the pipeline. So on the google VM:
+
+```
+# Copy the files that are needed to rerun the tool
+gsutil cp gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-somaticExome/somaticExome/[UNIQUE SUB WORKFLOW ID 1]/call-tumorIndexCram/tumor.cram .
+
+gsutil cp gs://[GCS REFERENCE FILES BUCKET]/human_GRCh38_ens105/aligner_indices/bwamem2_2.2.1/all_sequences.fa .
+
+# Enter an interactive docker
+docker run -it --env HOME --env GCS_CASE_NAME -v $HOME/:$HOME/ -v /shared/:/shared/ -v $HOME/.config/gcloud:/root/.config/gcloud mgibio/immuno_tools-cwl:1.0.2 /bin/bash
+
+# Run the command and watch for errors
+/usr/bin/optitype_script_wdl.sh /tmp . \
+optitype_tumor tumor.cram all_sequences.fa 8 50
+```
+
+> [!NOTE]  
+> Docker will have to be installed on the VM first.
+
+## Common Problems
+
+### Running out of Space
+
+Sometimes we encounter errors that are due to task running out of space during execution. We could see this when sequencing files are larger than expected. 
+```
+Feb 14 06:32:20 eve-immuno-jlf-100-082 java[1760]: 2025-02-14 06:32:20,715 cromwell-system-akka.dispatchers.engine-dispatcher-91886 
+INFO  - WorkflowManagerActor: Workflow 15175467-994d-4585-94d1-84e0101766da failed (during ExecutingWorkflowState): java.lang.Except
+ion: Task rnaseqStarFusion.kallisto:NA:4 failed. The job was stopped before the command finished. PAPI error code 9. Please check th
+e log file for more details: gs://jlf-rcrf-immuno-outputs/cromwell-executions/immuno/15175467-994d-4585-94d1-84e0101766da/call-rna/rnaseqStarFusion/a15a9d9d-2499-4911-b196-d382099f3d6f/call-kallisto/attempt-4/kallisto.log.
+```
+
+
+```
+Caught ResumableDownloadException (Transfer failed after 23 retries. Final exception: b'[Errno 28] No space left on device') for download of /cromwell_root/jlf-rcrf-immuno-outputs/cromwell-executions/immuno/9e157c36-5ce7-42f4-8f16-6c1031486475/call-rna/rnaseqStarFusion/a316145d-79db-45a3-b7a6-da13880fc410/call-sequenceToTrimmedFastq/shard-3/sequenceToTrimmedFastq/c03a6ea4-d168-4fab-b058-c81d53f40e86/call-trimFastq/glob-8fa4f5112e50bae5f8062c52535f8b66/trimmed_read_2.fastq component 7.
+ResumableDownloadException: Transfer failed after 23 retries. Final exception: b'[Errno 28] No space left on device'
+CommandException: Some components of /cromwell_root/jlf-rcrf-immuno-outputs/cromwell-executions/immuno/9e157c36-5ce7-42f4-8f16-6c1031486475/call-rna/rnaseqStarFusion/a316145d-79db-45a3-b7a6-da13880fc410/call-sequenceToTrimmedFastq/shard-3/sequenceToTrimmedFastq/c03a6ea4-d168-4fab-b058-c81d53f40e86/call-trimFastq/glob-8fa4f5112e50bae5f8062c52535f8b66/trimmed_read_2.fastq were not downloaded successfully. Please retry this download.
+```
+
+`Int space_needed_gb = 30 + round(size(flatten(fastqs), "GB") + size(kallisto_index, "GB"))`
+
+> [!TIP]
+> Space vs Memory: 
 
 ### Example: Sample IDs Not Matching
 ```
