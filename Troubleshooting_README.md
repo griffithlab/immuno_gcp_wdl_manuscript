@@ -1,17 +1,25 @@
 # Troubleshooting README
+ 
+ A pipeline run takes hours to days and when errors occur occur it is not always obvious what is going wrong. Here we will provide a guide on how we would go about troubleshoot a pipeline run and give examples and tips on common errors that we have encountered. 
+ 
+>[!IMPORTANT]  
+>Do not delete any cromwell-executions folders until your pipeline run has excuted sucessesfully. >If you deleted these folders, call-caching cannot be utilized and resources (time/money) will be >wasted re-executed steps that have already been completed sucessfully.
 
-Here we will give examples of problems that you may encounter during the ITB and immunogenomics review process
+ If you follow these steps and still cannot figure out the error. We encourage posting an issue on github.
 
 
 ## YAML Issues
 
-The most common problem that you can encounter is an error in the YAML file you created. 
+The most common problem that you can encounter is an error in the YAML file you created. It is important to verify that all the imformation in the YAML file is correct and often tiny errors are easily missed. We have crated a yaml checker script to help catch these small, but consequential errors. 
 
-- file paths being wrong
-- not matching sample IDS
-- strand setting (this won't mess up the pipleine but it will mess up results)
+The things the YAML checker script verifies:
+- That the sequencing file paths lead to a real file and are not duplicated in the YAML file.
+- The readgroup (RG) feild is unique between the Normal/Tumor DNA and RNA
+- There are no formatting issues such as improperly commented lines
+- If there were problematic amino acids or patient specific HLA alleles specified
+- The stand setting is specfied correctly
 
-We created a yaml checker script to help catch these small, but consequential errors. 
+Run the YAML checker script as followed (we suggest to do this before starting the pipeline run):
    
 ```bash
 docker run -it --env HOME --env GCS_CASE_NAME -v $HOME/:$HOME/ -v /shared/:/shared/ -v $HOME/.config/gcloud:/root/.config/gcloud mgibio/cloudize-workflow:latest /bin/bash
@@ -38,20 +46,22 @@ Aug 18 17:57:49 [VM NAME] java[1710]: 2025-08-18 17:57:49 cromwell-system-akka.d
 
 The error which caused the pipeline to fail is typically within the lines above this. Depending on the tool, the error message display will look different. Note that if you search the file for key words like 'Error' or 'Fail' you will see alot of messages containing phases/command arguments which are to do with error handling. These are not pipeline errors. 
 
-Once you find where the error is located there is usaully some indication of what step the error is coming from. Sometimes the error message printed in the cromwell log file is useful, but often it is neccassary to find the stderr file for the task which the error is coming from. Ususally there is a line before the error that looks like this: 
+Once you find where the error is located there is usaully some indication of what step the error is coming from. Sometimes the error message printed in the cromwell log file is useful, but often it is neccassary to find the `stderr` file for the task which the error is coming from. Ususally there is a line before the error that looks like this: 
 
-```Aug 18 17:57:45 [VM NAME] java[1710]: Check the content of stderr for potential additional information: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-somaticExome/somaticExome/[UNIQUE SUB WORKFLOW ID]/call-detectVariants/detectVariants/[UNIQUE SUB WORKFLOW ID 2]/call-filterVcf/filterVcf/[UNIQUE SUB WORKFLOW ID 23]/call-filterVcfDepth/attempt-3/stderr.```
+```
+Aug 18 17:57:45 [VM NAME] java[1710]: Check the content of stderr for potential additional information: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-somaticExome/somaticExome/[UNIQUE SUB WORKFLOW ID]/call-detectVariants/detectVariants/[UNIQUE SUB WORKFLOW ID 2]/call-filterVcf/filterVcf/[UNIQUE SUB WORKFLOW ID 23]/call-filterVcfDepth/attempt-3/stderr.
+```
 
 The error files for all individual tasks are located in the google bucket you designated your results to go to. Simply follow the path located in the error file to that stderr and view it on the web browser. Often times the errors located in this file are much more interpretable and will lead to a conclusion about what the problem is. 
 
-However, if the error is still not intreptable, we begin to do a traceback of pipeline tasks to identify where exactly the problem occured. In the same folder as the stderr file, explore the other files in the folder like the `stdout`, `log`, or `script`. The `script` file will let you know what command was run and inputs needed for that command. Make sure the inputs look correct. Some common things we have seen are the input files are empty or incredible small, indicating that a process was not completed correctly or was interrupted. 
+However, if the error is still not intreptable, we begin to do a traceback of pipeline tasks to identify where exactly the problem occured. In the same folder as the stderr file, explore the other files in the folder like the `stdout`, `log`, or `script`. The `script` file will let you know what command was run and inputs needed for that command. Make sure the inputs look correct. **Some common things we have seen are the input files are empty or incredible small, indicating that a process was not completed correctly or was interrupted.**
 
-Note: If the `call-caching` was used, if you resubmitted a workflow on the same VM, there might be a `place_holder.txt` that indicated where the data is being pulled (cahced) from. The file will look like this:
+Note: If the `call-caching` was used becasue you resubmitted a workflow on the same VM, there might be a `place_holder.txt` that indicated where the data is being pulled (cahced) from. The file will look like this:
 
 ```
 This directory does not contain any output files because this job matched an identical job that was previously run, thus it was a cache-hit.
 Cromwell is configured to not copy outputs during call caching. To change this, edit the filesystems.gcs.caching.duplication-strategy field in your backend configuration.
-The original outputs can be found at this location: gs://jlf-100-037/cromwell-executions/immuno/598fac4f-d678-49f6-a8a7-cbc9cb7adcc9/call-rna/rnaseqStarFusion/07a05ef5-4fd7-4ba2-8474-3189ad246480/call-kallisto
+The original outputs can be found at this location: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-rna/rnaseqStarFusion//[UNIQUE SUB WORKFLOW ID]/call-kallisto
 ```
 
 It might be useful to run a step separetly from the rest of the pipeline to try and isolate the issue further. Using the `script` file and the docker from the 
@@ -76,6 +86,11 @@ Jan 29 21:36:11 eve-immuno-jlf-100-082 java[12798]: 2025-01-29 21:36:11,916 crom
 Jan 29 21:36:11 eve-immuno-jlf-100-082 java[12798]: java.lang.Exception: Task mutect.mutectTask:3:4 failed. Job exit code 247. Check gs://jlf-rcrf-immuno-outputs/cromwell-executions/immuno/9e157c36-5ce7-42f4-8f16-6c1031486475/call-somaticExome/somaticExome/c822eef7-65c8-4660-8d39-a2afe1ebc6d0/call-detectVariants/detectVariants/43b22f5f-7b8f-4250-81ce-c28c806d5a4b/call-mutect/mutect/52f34299-cd9b-427f-97e5-6f997f7ee85c/call-mutectTask/shard-3/attempt-4/stderr for more information. PAPI error code 9. Please check the log file for more details: gs://jlf-rcrf-immuno-outputs/cromwell-executions/immuno/9e157c36-5ce7-42f4-8f16-6c1031486475/call-somaticExome/somaticExome/c822eef7-65c8-4660-8d39-a2afe1ebc6d0/call-detectVariants/detectVariants/43b22f5f-7b8f-4250-81ce-c28c806d5a4b/call-mutect/mutect/52f34299-cd9b-427f-97e5-6f997f7ee85c/call-mutectTask/shard-3/attempt-4/mutectTask-3.log.
 ```
 
+#### Adjusting WDLs to Give More Space
+
+## Adjusting Other Parameters in the TAML
+
+
 ## Google Cloud Errors
 
 ### Bucket permissions
@@ -92,6 +107,10 @@ Jun 13 03:10:40 eve-immuno-jlf-100-119 java[1788]: Caused by: java.io.IOExceptio
 1c-4917-9d52-545b057c53c2/call-rna/rnaseqStarFusion/
 
 ```
+
+## Sample Mixups
+
+## MD5 Checksums
 
 
 ## Common Problems Encountered During Immunogenomics Review
