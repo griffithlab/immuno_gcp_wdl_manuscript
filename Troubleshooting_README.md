@@ -3,7 +3,7 @@
  A pipeline run takes hours to days and when errors occur occur it is not always obvious what is going wrong. Here we will provide a guide on how we would go about troubleshoot a pipeline run and give examples and tips on common errors that we have encountered. 
  
 >[!IMPORTANT]  
->Do not delete any cromwell-executions folders until your pipeline run has excuted sucessesfully. >If you deleted these folders, call-caching cannot be utilized and resources (time/money) will be >wasted re-executed steps that have already been completed sucessfully.
+>Do not delete any cromwell-executions folders until your pipeline run has excuted sucessesfully. If you deleted these folders, call-caching cannot be utilized and resources (time/money) will be wasted re-executed steps that have already been completed sucessfully.
 
  If you follow these steps and still cannot figure out the error. We encourage posting an issue on github.
 
