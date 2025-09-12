@@ -949,11 +949,7 @@ Open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evid
 - Junction reads + Spanning read counts > 5 and junction reads >= 1
 - The fusion is not a read-through
   - Left Chr and Right Chr are different OR chromosome are the same BUT Left Strand and Right Strand are different OR chromosome and strand are the same BUT ABS(Left Pos - Right Pos) < 1,000,000 OR Fusion GeneA Name OR Fusion GeneB Name matches a known fusion driver gene
-- The fusion has large anchor support 
-
-We have created [fusion review scripts](https://github.com/kcotto/fusion_review_initial/tree/main) that pull our fusions from the above-listed criteria. 
-**SHOULD WE INCLUDE THE REVIEW SCRIPTS? what do you do next? -- test for binding?? Run pvacfuse??**
-
+- The fusion has a large anchor support 
 
 #### Example: GMB119
 <img width="1706" alt="GMB119 fusion inspector" src="https://github.com/user-attachments/assets/cbb288bd-066c-4640-8363-bb47b9df1f4e" />
