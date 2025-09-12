@@ -283,8 +283,3 @@ Changes to the best peptide need to be checked by rerunning pVACseq to make sure
 ```
 Aug 05 15:59:34 sidi-immuno-jlf-100-128 java[1744]: Failed to evaluate input 'data_size' (reason 1 of 1): [Attempted 1 time(s)] - StorageException: cromwell-server@jlf-rcrf.iam.gserviceaccount.com does not have storage.objects.get access to the Google Cloud Storage object. Permission 'storage.objects.get' denied on resource (or it may not exist).
 ```
-
-
-
-
-

@@ -10,9 +10,13 @@ size of files. In order to proceed, these files must all be present: tumor/norma
 BAM, variants VCF annotated for pVACseq, proximal variants VCF, annotated variants TSV,
 HLA typing results, FDA QC report files, pVACseq/pVACview results file.
 
-## Presentation to the Immunogenomics Tumor Board (ITB)
+### Creating an Immunogenomic Review Report
 
-Presentation of candidate neoantigens for selection by the Immunotherapy Tumor Board is
+For our vaccine clincal trials, we have found creating a document to organize notes during the Immunogenomics Review is helpful because it is a very manual process. These instructions outline how to create a similar report. After verifying that the data files look relatively normal.
+
+## Presenting Results in a Tumor Board Setting
+
+As mentioned in the the [protocol](link to paper), the first stage of the Immunogenomics Review is a presentation of candidate neoantigens for selection by an Immunogenomics Tumor Board (ITB). This is mainly
 performed using pVACview. Most files needed to conduct this review are produced by the
 immuno pipeline and saved as results. These consist of:
 - pVACview .R application files matched to the version of the results files
@@ -27,7 +31,7 @@ During the meeting the “Evaluation” column will be used to mark each Pending
 Accept, Review, or Reject until sufficient candidates have been identified (some lower priority
 candidates may remain Pending). Once the case review is complete use the Export functionality
 to save the candidates and selections in both TSV and Excel format. These will be the **ITB
-Reviewed Candidates** that will be used during the following genomics review.
+Reviewed Candidates** that will be used during the following steps of the review.
 
 ## ITB Evaluation Criteria
 
@@ -545,13 +549,17 @@ be found in the pvactools and pvacview documentation.
 
 <img width="846" alt="Anchor heatmap" src="https://github.com/user-attachments/assets/2e442523-6f27-4733-8489-ee8bad31251f" />
 
+
+> [!NOTE]  
+> See more examples of how to use pVACview for neoantigen candidate review [here](https://pvactools.readthedocs.io/en/latest/pvacview/pvacseq_module/pvacseq_vignette.html)
+
 ## Genomics Review (post ITB meeting)
 
 Once the ITB meeting is complete and the preliminary set of candidates has been nominated, a
 genomics review of all candidates must be completed following the procedures and criteria laid
 out below.
 
-## Example Location of Files Needed for Genomics Review
+### Example Location of Files Needed for Genomics Review
 
 **Variants Review Files**
 
@@ -574,7 +582,10 @@ CLE pipeline
 - **Ensembl 105 _GRCh 38 _UcscGenePred_Custom_Coding.ensGene** - > custom transcript
 annotation track containing only transcripts acceptable for neoantigen identification
 
+
 ## Genomics Review Checklist/Principles
+
+### QC Metrics
 
 The following are high level descriptions of the kinds of detailed review that should be
 performed following selection of candidates by the ITB
@@ -602,14 +613,14 @@ amplification of the same source DNA fragment).
         - 20 - 30 % good
         - < 20 % is excellent
 - Check Somalier results for sample tumor/normal **sample relatedness**.
-    - “Relatedness” column from file: “qc/concordance/concordance.somalier.pairs.tsv”
+    - “Relatedness” column from file: `qc/concordance/concordance.somalier.pairs.tsv`
     - Qualitative description of these rates:
         - \> 97.5 % is excellent
         - 95 %- 97.5 % is good
         - 90 - 95 % is concerning
         - < 90 % is very concerning
 - Check VerifyBamID results for **contamination** of both tumor and normal samples
-    - “FREEMIX” column from file (column 7 ): “qc/$sample/$sample.VerifyBamId.selfSM”
+    - “FREEMIX” column from file (column 7 ): `qc/$sample/$sample.VerifyBamId.selfSM`
     - Qualitative description of these rates:
         - < 0.025 is good
         - 0.025 - 0.05 is concerning
@@ -631,6 +642,10 @@ amplification of the same source DNA fragment).
     combined with polyA selection or oligo-dT cDNA priming can have a heavily biased
     distribution instead. Such data can still produce gene expression estimates but may
     be unable to effectively verify expression of some somatic variant alleles.
+
+> [!NOTE]  
+> See examples of good and bad end bias plots in the [Troubleshooting README](https://github.com/griffithlab/immuno_gcp_wdl_manuscript/blob/main/Troubleshooting_README.md).
+
 - Check that the correct RNA strand setting was used in the pipeline YAML file. For
 example, the
     - Detected strand file: qc/tumor_rna/trimmed_read_ 1 strandness_check.txt
@@ -647,6 +662,11 @@ the Immunotherapy Tumor Board will be a small subset of this number.
     - **Total neoantigen variants** called can be obtained from pVACview (total candidates)
     or by looking at the pVACseq aggregated report file to get this number.
 
+#### Generating a Report to summerize QC Metrics 
+
+> [!WARNING]  
+> Deprecated once included into pVACseq/pipeline
+
 To generate a report evaluation of the case's basic QC metrics, run the following commands
 
 ```bash
@@ -657,15 +677,17 @@ docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/g
 python3 /opt/scripts/get_neoantigen_qc.py -WB $WORKING_BASE -f final_results --yaml $WORKING_BASE/yamls/$CLOUD_YAML
 ```
 
-**FDA Quality Thresholds**
+#### Generating a Report to summerize FDA Metrics 
+
+> [!WARNING]  
+> Deprecated once included into pVACseq/pipeline
 
 The following subset of QC values can be obtained from the FDA report tables generated by the
 pipeline and used to determine whether the case meets basic data quality criteria as described
 in documentation provided to the FDA.
 
-<img width="666" alt="FDA Quality Thresholds" src="https://github.com/user-attachments/assets/af81ee46-3fc1-4c6b-8d7c-c25bda2a71b8" />
+To generate a table evaluating the case's FDA metrics, run the following commands:
 
-To generate a table evaluating the case's FDA metrics, run the following commands
 ```bash
 cd $WORKING_BASE
 
@@ -673,6 +695,11 @@ docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/g
 
 python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
 ```
+
+> [!WARNING]  
+> Include what the FDA metrics look like
+
+<img width="666" alt="FDA Quality Thresholds" src="https://github.com/user-attachments/assets/af81ee46-3fc1-4c6b-8d7c-c25bda2a71b8" />
 
 **Tumor type / driver variant review**
 
@@ -694,6 +721,9 @@ Make sure the HLA alleles as being used in pVACview for the final selection of c
 up with those expected for the case based on Optitype/PHLAT predictions from the data and
 clinical HLA typing results if available.
 
+
+#### Generating a Table to summerize predicted HLA alleles
+
 **HLA allele review of normal vs tumor**
 Check whether the HLA alleles predicted for normal and tumor samples are in agreement. Note
 any discrepancies.
@@ -706,7 +736,6 @@ docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/g
 
 python3 /opt/scripts/hla_comparison.py -WB $WORKING_BASE
 ```
-
 
 **Review multi-algorithm support for strong binding affinity**
 We are often using the “lowest” score method to prioritize candidates (the other, more
@@ -723,16 +752,15 @@ among the better performing algorithms
 ○ In cases where binding algorithms have high disagreement, additional weight should be
 given to presentation algorithms trained on peptide-elution mass spectrometry data
 
-**Compare variant results to CLE pipeline**
+**Compare variant results to another list of orthogonal variants**
 
-**THIS SHOULD BE GENERALIZED OR REMOVED FOR PUBLICATION**
-
-For all variants with neoantigen candidates, check if the variant was also called by the CLE
+In some cases you might know other variants you are expecting to find in your datat. If you specify that variant file in your YAML duirng for your pipeline runs, check if the variant was also called by the immuno
 pipeline. This status is automatically provided in the “VALIDATED” column in the
-variants.final.annotated.tsv file produced by the immuno pipeline. The CLE validation status is
+`variants.final.annotated.tsv` file produced by the immuno pipeline. The orthogonal variants validation status is
 also automatically incorporated into the Neoantigen Candidates review spreadsheet.
 
-**IGV Review**
+### IGV Review
+
 You can SMB mount to obtain access to the case data files on your local computer and create
 an IGV session with the following 6 components in order:
 1. Final somatic variant VCF from immuno pipeline (annotated.expression.vcf.gz)
@@ -742,7 +770,7 @@ an IGV session with the following 6 components in order:
 5. Tumor RNA-seq alignments (rnaseq/alignments/MarkedSorted.bam)
 6. Ensembl v 105 transcript annotations (Homo_sapiens.GRCh 38. 105 .sorted.coding.gtf)
 
-Save the session file on storage 1 for others to use. Use this session to perform the following
+Save the session file for others to use. Use this session to perform the following
 specific review activities and make note of the findings in the candidate review spreadsheet.
 
 - **Somatic variant review**: For any peptide candidate being considered for inclusion in the
@@ -984,11 +1012,3 @@ iterative process of searching for an optimal ordering is repeated.
 
 The output of pVACvector can be used as input for a DNA, mRNA or adenovirus vaccine
 delivery platform.
-
-
-
-
-# Things to ADD
-## Add something about running pVACvector
-## Fusion Review
-## splice mutations?
