@@ -22,12 +22,21 @@ The structure of this report is:
 2. Files Used: a list of Google Bucket paths (or local paths if the final outputs will be stored somewhere locally) pointing to the files used for pVACview and IGV.
 3. Basic data QC Review: QC metrics used to evaluate basic data quality.
 4. FDA Quality Thresholds: QC metrics described in clinical trial FDA documentation.
-5. HLA allele review: A comparison between HLA allele predictions between different algorithms and (if included) clinical HLA typing. This is important because we do not want to target candidates on for alleles that are not true to the patient.
-6. Tumor type / driver variant review: What variants we expect to see and if they are known to drive tumor progression. These will be important neoantigen candidates to prioritize.
-7. Fusion review: Fusion candidates that need further review.
-8. Comparison to orthogonal variant calls: a comparison of the pipeline's variant calls to another source of variant information (if included).
-9. Review of multi-algorithm support for strong binding affinity: A description of the predicted binding affinity of candidates of interest. This section contains detailed notes of the review done using pVACview.
-10. IGV review: This section is dedicated to the final stage for visually verifying the candidates of interest in IGV. Often this section functions as a conclusion for the immungenomics review. It details how many candidates were reviewed, which candidates got rejected, why certain candidates got rejected, and other interesting or concerning things of note from the case.
+
+>[!NOTE]
+> Maybe remove
+
+
+6. HLA allele review: A comparison between HLA allele predictions between different algorithms and (if included) clinical HLA typing. This is important because we do not want to target candidates on for alleles that are not true to the patient.
+7. Review of multi-algorithm support for strong binding affinity: A description of the predicted binding affinity of candidates of interest. This section contains detailed notes of the review done using pVACview.
+8. Tumor type / driver variant review: What variants we expect to see and if they are known to drive tumor progression. These will be important neoantigen candidates to prioritize.
+9. Fusion review: Fusion candidates that need further review.
+10. Comparison to orthogonal variant calls: a comparison of the pipeline's variant calls to another source of variant information (if included).
+
+>[!NOTE]
+> Give examples or figure out what to call these variants
+
+11. IGV review: This section is dedicated to the final stage for visually verifying the candidates of interest in IGV. Often this section functions as a conclusion for the immungenomics review. It details how many candidates were reviewed, which candidates got rejected, why certain candidates got rejected, and other interesting or concerning things of note from the case.
 
 We have created several scripts to aid in the generation of these lists of metrics
 
