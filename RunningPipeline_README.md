@@ -18,7 +18,7 @@ You will interact with the Google Cloud in several ways:
 
 This version assumes that you are staging your input data files from your local system (e.g. a laptop, but could be any system really). All input files will be staged to a Google Storage Bucket. During the workflow, all results files will also be stored in this Bucket. At the end of the tutorial the final results will be copied back to your local system.
 
-After completing the workflow, ALL resources used on the cloud can be destroyed. One possible exception to this may occur if you need custom reference files that you wish to persist for many analyses. However, for this tutorial reference files will be accessed from a separate public bucket that we have created to support this workflow.
+After completing the workflow, ALL resources used on the cloud can be destroyed. One possible exception to this may occur if you need custom reference files that you wish to persist for many analyses. 
 
 A brief note on command line sessions. Almost everything below will occur at the command line. It is very easy to get confused about the kind of sessions used. There are three types that will be used:
 1. A terminal session on your local system (e.g. using the Terminal App on a Mac laptop)
@@ -26,7 +26,7 @@ A brief note on command line sessions. Almost everything below will occur at the
 3. Within session (1) you may login (via `gcloud compute ssh`) to the Google Virtual Machine where Cromwell is running.
 
 ### Source of instructions
-This tutorial is a specific example of how to run a specific pipeline (immuno) on a specific example dataset (HCC1395 Tumor/normal cell line pair). The steps below are taken from the following link where you will find a more generic set of documentation that explains in detail how to run any WDL pipeline on the Google Cloud using tools created to assist this process. 
+This tutorial is an example of how to run a specific pipeline (immuno) on a specific example dataset (HCC1395 Tumor/normal cell line pair). The steps below are taken from the following link where you will find a more generic set of documentation that explains in detail how to run any WDL pipeline on the Google Cloud using tools created to assist this process. 
 https://github.com/griffithlab/cloud-workflows/tree/main/manual-workflows
 
 ### Prerequisites
@@ -42,11 +42,11 @@ In order to do analysis on the Google Cloud, you will need an account. Ideally t
 
 Some notes on account setup once you are logged in:
 - Create a new project. In this tutorial we use project name: 'test-immuno'. When using the Google Web Console, remember to select this project in the top left corner.
-- Create billing alerts! In the Google Cloud Web Console, select: Billing -> Budgets & alerts -> Create Budget. How you set up your alerts will depend on your anticipated level of use/expenditure. For example, you might set at $500 budget and then set up alerts to be sent at 50%, 100%, 200%, ..., X% of that budget.
+- Create billing alerts! In the Google Cloud Web Console, select: Billing -> Budgets & alerts -> Create Budget. How you set up your alerts will depend on your anticipated level of use/expenditure. For example, you might set a $500 budget and then set up alerts to be sent at 50%, 100%, 200%, ..., X% of that budget.
 - Choose a name for the Google bucket that will be used for this tutorial. Note that you don't need to create it in the console because this will be handled automatically for you below. We will use the bucket name 'test-immuno-pipeline' below.
  
 Some notes on quotas:
-- If you have not been using your account for high-performance computing, it is likely that by default you have quotas in place that will cause the very large immuno.wdl workflow to fail. For example, you may not be able to use enough CPUs, IP addresses and disk space at once to get this workflow to run. If you see errors that mention quotas, or sound like fundamental network failures, check your quotas in the Google Cloud Console (IAM & Admin -> Quotas) and work with your Google account contact to increase your quotas. If your institution has already been using Google Cloud in any serious way, this is less likely to be a problem. 
+- If you have not been using your account for high-performance computing, it is likely that the quotas in place will cause the very large immuno.wdl workflow to fail. For example, you may not be able to use enough CPUs, IP addresses and disk space at once to get the workflow to run. If you see errors that mention quotas, or sound like fundamental network failures, check your quotas in the Google Cloud Console (IAM & Admin -> Quotas) and work with your Google account contact to increase your quotas. If your institution has already been using Google Cloud in any serious way, this is less likely to be a problem. 
 
 Example quotas you might need to request:
 - `cpus` -> `us-central1` -> `100`
@@ -89,16 +89,16 @@ cd $WORKING_BASE
 ```
 
 ### Clone git repositories that have the workflows (pipelines) and scripts to help run them
-The following repositories contain: this tutorial (immuno_gcp_wdl), the WDL workflows (analysis-wdls), and tools for running these on the cloud (cloud-workflows). Note that the command below will clone the main branch of each repo. But as a comment at the end of each command in brackets is a specific tag of that repo. The combination of these tags for each repo were tested together and verified to work for this tutorial.
+The following repositories contain: this tutorial (immuno_gcp_wdl), the WDL workflows (analysis-wdls), and tools for running these on the cloud (cloud-workflows). Note that the command below will clone the branch of each repo that was tested and verified to work for this tutorial. If you would like to keep up with our latest updates, the release branches can be found at the respective GitHub repositories. Note that the analysis-wdls repository cloned at this step is only for record keeping. The version used by the pipeline itself depends on the cloud-workflows repository.
 ```bash
 mkdir git
 cd git
 
 git clone git@github.com:griffithlab/immuno_gcp_wdl_manuscript.git 
 
-git clone –-branch v1.3.0 https://github.com/wustl-oncology/analysis-wdls.git
+git clone –-branch v1.4.0 https://github.com/wustl-oncology/analysis-wdls.git
 
-git clone --branch v1.4.4 https://github.com/wustl-oncology/cloud-workflows.git
+git clone --branch v1.4.8 https://github.com/wustl-oncology/cloud-workflows.git
 ```
 
 ### Login to GCP and set the desired project
