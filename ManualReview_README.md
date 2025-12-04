@@ -1,25 +1,25 @@
 # Immunogenomics Review 
 
-The purpose of the immmunogenomics review is to confirm that the results of the computational pipline are correct and reasonable. This process involves checking if the output contains the correct files, reviewing quality control (qc) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools, IGV and pVACview, to manually verify the neoantigen candidates.These steps assure that the neantigen candidates of interest are of the highest confidence.
+The purpose of the immmunogenomics review is to confirm that the results of the ImmunoNX pipeline are correct. This process involves checking if the output contains the correct files, reviewing quality control (QC) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools: IGV and pVACview, to manually verify the neoantigen candidates. These steps help ensure that high confidence neantigen candidates are selected.
 
-## Initial review of Immuno Pipeline Outputs
+## Initial review of ImmunoNX Pipeline Outputs
 
-At this stage we mostly just want to confirm that the pipeline succeeded and that transferring the
-data files into the case folder on storage 1 was successful. Check the total number and total
-size of files. In order to proceed, these files must all be present: tumor/normal DNA BAMs, RNA
-BAM, variants VCF annotated for pVACseq, proximal variants VCF, annotated variants TSV,
-HLA typing results, FDA QC report files, pVACseq/pVACview results file.
+At this stage we mostly want to confirm that the pipeline succeeded and that transferring the
+data files into the case folder on our local server was successful. Check the total number and total
+size of files. In order to proceed, the following files must be present: tumor/normal DNA BAMs, RNA
+BAM, annotated variants VCF for pVACseq, proximal variants VCF, annotated variants TSV,
+HLA typing results, QC report files, and pVACseq/pVACview results file.
 
 >[!NOTE]
 >Add a screenshot of the du -sh after the results are pulled, making sure to note that files sizes may differ?
 
 ### Creating an Immunogenomic Review Report
 
-For our vaccine clinical trials, we have found creating a document to organize notes during the Immunogenomics Review is helpful because it is a very manual process. These instructions outline how to create a similar report. After verifying that the data files look relatively normal. The structure of this report also provides a roadmap of how to conduct a manual review of candidates. 
+For our vaccine clinical trials, we have found creating a document to organize notes during the Immunogenomics Review is helpful because the review is a very manual process. These instructions outline how to create a similar report. After verifying that the data files look relatively normal. The structure of this report also provides a roadmap of how to conduct a manual review of candidates. 
 
 The structure of this report is:
 1. Introduction: a brief description of the patient's history, where the data comes from, and/or what results are expected.
-2. Files Used: a list of Google Bucket paths (or local paths if the final outputs will be stored somewhere locally) pointing to the files used for pVACview and IGV.
+2. Files Used: a list of Google Bucket paths (or local paths if the final outputs will be stored locally) pointing to the files used for pVACview and IGV.
 3. Basic data QC Review: QC metrics used to evaluate basic data quality.
 4. FDA Quality Thresholds: QC metrics described in clinical trial FDA documentation.
 
@@ -27,7 +27,7 @@ The structure of this report is:
 > Maybe remove
 
 
-6. HLA allele review: A comparison between HLA allele predictions between different algorithms and (if included) clinical HLA typing. This is important because we do not want to target candidates on for alleles that are not true to the patient.
+6. HLA allele review: A comparison between HLA allele predictions between different algorithms and (if included) clinical HLA typing. This is important because we do not want to predict candidates for alleles that are not in the patient.
 7. Review of multi-algorithm support for strong binding affinity: A description of the predicted binding affinity of candidates of interest. This section contains detailed notes of the review done using pVACview.
 8. Tumor type / driver variant review: What variants we expect to see and if they are known to drive tumor progression. These will be important neoantigen candidates to prioritize.
 9. Fusion review: Fusion candidates that need further review.
@@ -36,14 +36,11 @@ The structure of this report is:
 >[!NOTE]
 > Give examples or figure out what to call these variants
 
-11. IGV review: This section is dedicated to the final stage for visually verifying the candidates of interest in IGV. Often this section functions as a conclusion for the immungenomics review. It details how many candidates were reviewed, which candidates got rejected, why certain candidates got rejected, and other interesting or concerning things of note from the case.
+11. IGV review: This section is dedicated to the final stage for visually verifying the candidates of interest in IGV. Often this section functions as a conclusion for the immunogenomics review. It details how many candidates were reviewed, which candidates got rejected and why, and other interesting or concerning things of note from the case.
 
 We have created several scripts to aid in the generation of these lists of metrics
 
 #### Generating a Report to summarize QC Metrics 
-
-> [!WARNING]  
-> Deprecated once included into pVACseq/pipeline
 
 To generate a report evaluation of the case's basic QC metrics, run the following commands
 
@@ -55,16 +52,12 @@ docker run -it --env HOME --env WORKING_BASE -v $HOME/:$HOME/ -v $HOME/.config/g
 python3 /opt/scripts/get_neoantigen_qc.py -WB $WORKING_BASE -f final_results --yaml $WORKING_BASE/yamls/$CLOUD_YAML
 ```
 
-#### Generating a Report to summarize FDA Metrics 
+#### Generating a Report to summarize QC Metrics 
 
-> [!WARNING]  
-> Deprecated once included into pVACseq/pipeline
+The following set of QC values can be obtained from the QC report tables generated by the
+pipeline and are used to determine whether the case meets certain data quality criteria.
 
-The following subset of QC values can be obtained from the FDA report tables generated by the
-pipeline and used to determine whether the case meets basic data quality criteria as described
-in the documentation provided to the FDA.
-
-To generate a table evaluating the case's FDA metrics, run the following commands:
+To generate a table evaluating the case's QC metrics, run the following commands:
 
 ```bash
 cd $WORKING_BASE
@@ -79,7 +72,7 @@ python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
 
 #### Generating a Table to summarize HLA predictions
 
-To generate a table with the predicted normal and tumor HLA allele, run the following commands
+To generate a table with the predicted normal and tumor HLA alleles, run the following commands
 ```bash
 cd $WORKING_BASE
 
@@ -90,14 +83,14 @@ python3 /opt/scripts/hla_comparison.py -WB $WORKING_BASE
 
 ## Presenting Results in a Tumor Board Setting
 
-As mentioned in the [protocol](link to paper), the first stage of the Immunogenomics Review is a presentation of candidate neoantigens for selection by an Immunogenomics Tumor Board (ITB). This is mainly
+As mentioned in the publication, the first stage of the Immunogenomics Review is a presentation of candidate neoantigens for selection by an Immunogenomics Tumor Board (ITB). This is mainly
 performed using pVACview. Most files needed to conduct this review are produced by the
-immuno pipeline and saved as results. These consist of:
+ImmunoNX pipeline and saved as results. These consist of:
 - pVACview .R application files matched to the version of the results files
 - $sample-name.all_epitopes.aggregated.tsv (Class I)
 - $sample-name.all_epitopes.aggregated.metrics.json (Class I)
 - $sample-name.all_epitopes.aggregated.tsv (Class II)
-- Cancer Gene Census List in TSV format downloaded from Cosmic
+- Cancer Gene List in TSV format with Genes in the first column
 
 Before the ITB meeting. Load these files in pVACview and make sure everything is working.
 
@@ -117,16 +110,15 @@ special cases and exceptions.
 
 Based on the tumor DNA VAF of known drivers and/or consideration of the distribution of tumor
 variants you may choose to adjust the Clonal DNA VAF and “Recalculate Tiering” before
-beginning the review. For example, if the tumor has a TP 53 or KRAS driver variant with VAF of
-25 % and you believe it represents a heterozygous (non-CNV altered region) you might set this
-cutoff to 25 %.
+beginning the review. For example, if the tumor has a TP53 or KRAS driver variant with a VAF of
+25% and you believe it represents a heterozygous (non-CNV altered region) you might set this
+cutoff to 25%.
 
 **Variant Type**
 
 Consider whether the variant is a SNV, InDel or DNV. Variants that are insertions, deletions or
 nucleotide variants have different interpretations from the perspective of DNA and RNA VAF,
 reference matches, number of core binding peptides expected, etc.
-
 
 [**TSL (transcript support level)**](https://grch37.ensembl.org/info/genome/genebuild/transcript_quality_tags.html)
 
@@ -155,18 +147,19 @@ column will be highlighted red) then mark the candidate as **Reject**.
 **Prob Pos (Problematic Positions)**
 
 In past testing it has been observed that peptides containing cysteines may result in difficulties
-during synthesis, disulfide bond formation, or reduced stability during storage. Peptides
-containing cysteines may later fail identity/purity tests (e.g. by LC MS) during drug product
-testing (which may be requested by the FDA).
+during synthesis, due to disulfide bond formation, or have reduced stability during storage. Thus, peptides
+containing cysteines may later fail identity/purity tests during drug product
+testing.
 
 For most studies using a synthetic long peptide approach for vaccine delivery, if any position in
-the core binding peptide has a cysteine, then mark the candidate as **Reject**. Some long peptide
+the core binding peptide has a cysteine, our group marks the candidate as **Reject**. Some long peptide
 vaccine studies allow some amount of cysteines in the synthesized peptide (e.g. 1 - 2 in the long
 peptide sequence) and may attempt to mitigate the potential issues above (e.g by strategic
-pooling, such as avoiding multiple cysteine containing peptides in the same pool).
+pooling, such as avoiding multiple cysteine containing peptides in the same pool). You may need to clarify if
+Cysteines need to be excluded by contacting your peptide manufacturer.
 
-For studies using DNA/RNA vectors for vaccine delivery, no problematic amino acids will be
-defined in the pVACtools analysis and this criteria can be ignored.
+For studies using DNA/RNA vectors for vaccine delivery, no problematic amino acids should be
+defined in the input YAML file, and this criteria can be ignored.
 
 
 **Num Passing Peptides**
@@ -178,28 +171,28 @@ pVACtools parameters include: _- -binding-threshold_ , _- -percentile-threshold_
 
 _- -allele-specific-binding-thresholds_ and _- -top-score-metric_.
 
-**IC 50 and %tile MT (median mutant peptide binding affinity prediction)**
+**IC50 and %ile MT (median mutant peptide binding affinity prediction)**
 
-The median IC 50 should be less than 500 nm or the median percentile less than 1 % for an
-Accept. Exceptions are sometimes made if: (a) the variant is a known driver, (b) elution
-algorithms (e.g. BigMHC_EL, MHCflurryEL Presentation, NetMHCpanEL) have a score with <
-1.0 %tile, (c) if there is disagreement between prediction algorithms and some predict that it is a
-strong binder (particularly NETMHCpan and MHCflurry as these algorithms have performed well
+The median IC50 should be less than 500 nm or the median percentile less than 1% for an
+Accept. Exceptions are sometimes made if: (a) the variant is a known cancer driver, (b) elution
+algorithms (e.g. BigMHC_EL, MHCflurryEL Presentation, NetMHCpanEL) have a score with <1.0 %ile, 
+(c) if there is disagreement between prediction algorithms and some predict that it is a
+strong binder (particularly NetMHCpan and MHCflurry as these algorithms have performed well
 in benchmarking exercises).
 
 **RNA Expr (gene expression estimate)**
 
-The gene expression estimate should be > 1 TPM for an Accept. A rare exception that might be
+The gene expression estimate should be >1 TPM for an Accept. A rare exception that might be
 evaluated during genomics review is when the RNA VAF and RNA coverage of the specific
-variant allele is strong but the gene expression was < 1 TPM.
+variant allele is strong but the gene expression was <1 TPM.
 
 **RNA VAF (RNA variant allele fraction)**
 
 An RNA VAF > 0 is generally required for an Accept. Higher is better. A low VAF may indicate
 sub-clonality or allele specific expression. If the RNA depth is high, the DNA VAF is acceptable
-but the RNA VAF is low (e.g. < 5 %) then Reject (evidence of allele specific expression for the
+but if the RNA VAF is low (e.g. < 5%) then Reject (evidence of allele specific expression favoring the
 wild type allele). In rare cases, exceptions may be made if: (a) the variant is a known driver, (b)
-the gene is expressed at a high level; and (c) the low RNA VAF may be explained by lower
+the gene is expressed at a high level; or (c) the low RNA VAF may be explained by lower
 coverage for technical reasons (e.g., in a region suffering from end bias).
 
 **Allele Expr (Allele Expression)**
@@ -207,7 +200,7 @@ coverage for technical reasons (e.g., in a region suffering from end bias).
 This metric is the product of the RNA VAF and Gene Expression value. We have generally
 required a minimum Allele Expression value of 3 for Accept. Exceptions are sometimes made
 and a lower value is accepted in the 1 - 3 range, if the DNA VAF indicates that the variant is
-subclonal but otherwise a strong candidate.
+subclonal but it is otherwise a strong candidate.
 
 **RNA Depth**
 
@@ -222,7 +215,7 @@ cDNA fragments supporting the variant should be examined (e.g. if the supporting
 
 
 In the case of small numbers of supporting RNA reads, the alignments of these reads should be
-examined to confirm that they are consistent with a mature RNA sequence. For example, if the
+examined to confirm that they are consistent with a mRNA sequence. For example, if the
 RNA reads containing the variant are spliced across introns (exon-exon junctions) this would
 represent stronger support than if they are contained within an exon. Similarly, if the RNA-seq
 data was generated in a strand-specific way, RNA reads containing the variant that also match
@@ -637,7 +630,7 @@ out below.
 
 **Variants Review Files**
 
-- **variants.final.annotated.tsv** - > used to verify that Immuno variants were also called by
+- **variants.final.annotated.tsv** - > used to verify that ImmunoNX variants were also called by
 CLE pipeline
 
 **pVACseq Review Files**
@@ -649,7 +642,7 @@ CLE pipeline
 
 **IGV Review Files**
 
-- **annotated.expression.vcf.gz** - > Immuno variant positions to load into IGV
+- **annotated.expression.vcf.gz** - > ImmunoNX variant positions to load into IGV
 - **normal.cram** - > Normal exome DNA alignments to load into IGV
 - **tumor.cram** - > Tumor exome DNA alignments to load into IGV
 - **rnaseq/alignments/MarkedSorted.bam** - > Tumor RNA-seq alignments to load into IGV
@@ -773,21 +766,20 @@ given to presentation algorithms trained on peptide-elution mass spectrometry da
 
 **Compare variant results to another list of orthogonal variants**
 
-In some cases you might know other variants you are expecting to find in your datat. If you specify that variant file in your YAML duirng for your pipeline runs, check if the variant was also called by the immuno
+In some cases you might know other variants you are expecting to find in your datat. If you specify that variant file in your YAML for your pipeline runs, check if the variant was also called by the ImmunoNX
 pipeline. This status is automatically provided in the “VALIDATED” column in the
-`variants.final.annotated.tsv` file produced by the immuno pipeline. The orthogonal variants validation status is
+`variants.final.annotated.tsv` file produced by the ImmunoNX pipeline. The orthogonal variants validation status is
 also automatically incorporated into the Neoantigen Candidates review spreadsheet.
 
 ### IGV Review
 
 You can SMB mount to obtain access to the case data files on your local computer and create
 an IGV session with the following 6 components in order:
-1. Final somatic variant VCF from immuno pipeline (annotated.expression.vcf.gz)
-2. CLE variant VCF (annotated_filtered.vcf.gz.commented.gz.commented.gz)
-3. Normal exome DNA alignments (normal.cram)
-4. Tumor exome DNA alignments (tumor.cram)
-5. Tumor RNA-seq alignments (rnaseq/alignments/MarkedSorted.bam)
-6. Ensembl v 105 transcript annotations (Homo_sapiens.GRCh 38. 105 .sorted.coding.gtf)
+1. Final somatic variant VCF from ImmunoNX pipeline (annotated.expression.vcf.gz)
+2. Normal exome DNA alignments (normal.cram)
+3. Tumor exome DNA alignments (tumor.cram)
+4. Tumor RNA-seq alignments (rnaseq/alignments/MarkedSorted.bam)
+5. Ensembl v105 transcript annotations ([Homo_sapiens.GRCh38.105.sorted.coding.gtf](https://ftp.ensembl.org/pub/release-105/gtf/homo_sapiens/Homo_sapiens.GRCh38.105.gtf.gz))
 
 Save the session file for others to use. Use this session to perform the following
 specific review activities and make note of the findings in the candidate review spreadsheet.
@@ -821,8 +813,6 @@ the following IGV display settings are useful: ( 1 ) “View as pairs” and ( 2
 alignments by” - > “first-of-pair strand”. Note that to perform the transcript isoform review,
 it will be necessary to load the correct Ensembl GTF of transcripts in IGV. 
 
-**MAKE SURE ENSEMBL GTF IS AVAILABLE**
-
 **Long Peptide Extraction and Annotation**
 
 Using the selected transcript, extract 51-mer peptide sequences that contain the candidate neoantigen. Annotate this sequence with the "best" class-I and class-II binding peptides. The selection of long peptide sequences chosen should reflect the final conclusion of the ITB review and genomics review.
@@ -837,7 +827,7 @@ An example of how this command would look:
 gzcat $WORKING_BASE/final_results/annotated.expression.vcf.gz | less
 export TUMOR_SAMPLE_ID="hcc1395-tumor-exome"
 
-docker run -it --env WORKING_BASE --env TUMOR_SAMPLE_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/pvactools:4.0.1 /bin/bash
+docker run -it --env WORKING_BASE --env TUMOR_SAMPLE_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/pvactools:5.4.0 /bin/bash
 
 cd $WORKING_BASE/
 
