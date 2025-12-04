@@ -1,17 +1,14 @@
 # Immunogenomics Review 
 
-The purpose of the immmunogenomics review is to confirm that the results of the ImmunoNX pipeline are correct. This process involves checking if the output contains the correct files, reviewing quality control (QC) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools: IGV and pVACview, to manually verify the neoantigen candidates. These steps help ensure that high confidence neantigen candidates are selected.
+The purpose of the immunogenomics review is to confirm that the results of the ImmunoNX pipeline are correct. This process involves checking if the output contains the correct files, reviewing quality control (QC) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools: **IGV** and **pVACview**, to manually verify the neoantigen candidates. These steps help ensure that high confidence neantigen candidates are selected.
 
 ## Initial review of ImmunoNX Pipeline Outputs
 
-At this stage we mostly want to confirm that the pipeline succeeded and that transferring the
+At this stage, we mostly want to confirm that the pipeline succeeded and that transferring the
 data files into the case folder on our local server was successful. Check the total number and total
 size of files. In order to proceed, the following files must be present: tumor/normal DNA BAMs, RNA
 BAM, annotated variants VCF for pVACseq, proximal variants VCF, annotated variants TSV,
 HLA typing results, QC report files, and pVACseq/pVACview results file.
-
->[!NOTE]
->Add a screenshot of the du -sh after the results are pulled, making sure to note that files sizes may differ?
 
 ### Creating an Immunogenomic Review Report
 
@@ -178,7 +175,7 @@ Accept. Exceptions are sometimes made if: (a) the variant is a known cancer driv
 algorithms (e.g. BigMHC_EL, MHCflurryEL Presentation, NetMHCpanEL) have a score with <1.0 %ile, 
 (c) if there is disagreement between prediction algorithms and some predict that it is a
 strong binder (particularly NetMHCpan and MHCflurry as these algorithms have performed well
-in benchmarking exercises).
+in benchmarking exercises.
 
 **RNA Expr (gene expression estimate)**
 
@@ -612,7 +609,7 @@ strong, the candidate should be Rejected. If the mutation position corresponds t
 and the binding/presentation of the wild-type is weak the candidate may be Accepted (assuming
 all other criteria are met). If the mutant is not at an anchor position, the wild type
 binding/presentation may be ignored. Additional extensive descriptions of this assessment can
-be found in the pvactools and pvacview documentation.
+be found in the pVACtools and pVACview documentation.
 
 <img width="846" alt="Anchor heatmap" src="https://github.com/user-attachments/assets/2e442523-6f27-4733-8489-ee8bad31251f" />
 
@@ -815,7 +812,7 @@ it will be necessary to load the correct Ensembl GTF of transcripts in IGV.
 
 ## Long Peptide Extraction and Final Report Generation
 
-Using the selected transcript, extract 51-mer peptide sequences that contain the candidate neoantigen. Annotate this sequence with the "best" class-I and class-II binding peptides. The selection of long peptide sequences chosen should reflect the final conclusion of the ITB review and genomics review.
+Using the selected transcript, extract 51-mer peptide sequences that contain the candidate neoantigen. Annotate this sequence with the "best" class-I and class-II binding peptides. The selection of long peptide sequences should reflect the final conclusion of the ITB review and genomics review.
 
 Use `pvacseq create_peptide_ordering_form` to create a fasta file that has the long peptide sequences needed.
 These files are useful in the manual review process.
@@ -852,10 +849,10 @@ exit
 ```
 
 > [!NOTE]  
-> During a normal review process, where you accept candidates in pVACview first duirng an ITB meeting, you will probabt only want to generate 51mers for the candidates marked "Accept" or "Review". Change the `--aggregate-report-evaluation` argument accordingly.
+> During a normal review process, where you accept candidates in pVACview first during an ITB meeting, you will probaby only want to generate 51mers for the candidates marked "Accept" or "Review". Change the `--aggregate-report-evaluation` argument accordingly.
 
 > [!NOTE]  
-> The `allow-incomplete-transcripts` will not be necassary for pipeline runs using pVACseq v6 or greater, which will automatically exclude incomplete transcripts.
+> The `allow-incomplete-transcripts` will not be necessary for pipeline runs using pVACseq v6 or greater, which will automatically exclude incomplete transcripts.
 
 ### 1. Peptide Fasta
 
@@ -892,7 +889,7 @@ Get the molecular weight for each long peptide sequence by using the EMBOSS Peps
 
 ### 3. Reviewed Candidates Table (MHC Class I)
 
-A spreadsheet with the reviewed class I candidates from pVACview along with any notes on each candidate. Each row corresponds to a single variant leading to potential neoantigens, with the top candidate provided. Each should include the final evaluation: Reject or Accept. Each should also include any detailed notes from the pVACview and IGV reviews that document the rationale for Accepting or Rejecting the candidate.
+A spreadsheet with the reviewed class I candidates from pVACview along with any notes on each candidate. Each row corresponds to a single variant leading to potential neoantigens, with the top candidate provided. Each should include the final evaluation: Reject or Accept. Each should also include any detailed notes from the pVACview and IGV reviews that document the rationale for accepting or rejecting the candidate.
 
 The starting point for this spreadsheet is the TSV that is exported from pVACview at the end of the review in the Immunotherapy Tumor Board meeting. 
 
