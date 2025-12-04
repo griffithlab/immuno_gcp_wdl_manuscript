@@ -5,7 +5,7 @@
  # Pipeline Execution Errors
 
 >[!IMPORTANT]  
->Do not delete any Cromwell-executions folders until your pipeline run has excuted sucessesfully. If you deleted these folders, call-caching cannot be utilized and resources (time/money) will be wasted to re-execute steps that have already been completed sucessfully.
+>Do not delete any Cromwell-executions folders until your pipeline run has executed successfully. If you deleted these folders, call-caching cannot be utilized and resources (time/money) will be wasted to re-execute steps that have already been completed sucessfully.
 
 If you follow these steps and still cannot figure out the error. We encourage posting an issue on this GitHub repository.
 
@@ -53,9 +53,9 @@ Start at the bottom of the file, where there should be a line that looks like:
 Aug 18 17:57:49 [VM NAME] java[1710]: 2025-08-18 17:57:49 cromwell-system-akka.dispatchers.engine-dispatcher-7125 INFO  - WorkflowManagerActor: Workflow actor for [WORKFLOW ID] completed with status 'Failed'. The workflow will be removed from the workflow store.
 ```
 
-The error that caused the pipeline to fail is typically within the lines above this. Depending on the tool, the error message display will look different. Note that if you search the file for key words like 'Warning', 'Error' or 'Fail', you will see a lot of messages containing phrases/command arguments which have to do with error handling. These are not necessarily pipeline errors!
+The error that caused the pipeline to fail is typically within the lines above this. Depending on the tool, the error message display will look different. Note that if you search the file for key words like 'Warning', 'Error' or 'Fail', you will see a lot of messages containing phrases/command arguments that have to do with error handling. These are not necessarily pipeline errors!
 
-Once you find where the error is located, there is usually some indication of which step the error occured at. Sometimes the error message printed in the Cromwell log file is useful, but often it is necessary to find the `stderr` file for the task from which the error is coming from. Usually there is a line before the error that looks like this: 
+Once you find where the error is located, there is usually some indication of which step the error occurred at. Sometimes the error message printed in the Cromwell log file is useful, but often it is necessary to find the `stderr` file for the task from which the error is coming from. Usually there is a line before the error that looks like this: 
 
 
 ```
@@ -73,7 +73,7 @@ Note: If `call-caching` was used because you resubmitted a workflow on the same 
 ```
 This directory does not contain any output files because this job matched an identical job that was previously run, thus it was a cache-hit.
 
-Cromwell is configured to not copy outputs during call caching. To change this, edit the filesystems.gcs.caching.duplication-strategy field in your backend configuration.
+Cromwell is configured not to copy outputs during call caching. To change this, edit the filesystems.gcs.caching.duplication-strategy field in your backend configuration.
 
 The original outputs can be found at this location: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-rna/rnaseqStarFusion//[UNIQUE SUB WORKFLOW ID]/call-kallisto
 ```
@@ -140,7 +140,7 @@ ion: Task rnaseqStarFusion.kallisto:NA:4 failed. The job was stopped before the 
 e log file for more details: gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-rna/rnaseqStarFusion/[UNIQUE SUB WORKFLOW ID]/call-kallisto/attempt-4/kallisto.log.
 ```
 
-As you can see, the error is occuring at kallisto and we are directed to the Kallisto log. If we look at that log, we see that the task tried to pull a certain file onto the task's VM and failed. 
+As you can see, the error is occurring at kallisto and we are directed to the Kallisto log. If we look at that log, we see that the task tried to pull a certain file onto the task's VM and failed. 
 
 ```
 Caught ResumableDownloadException (Transfer failed after 23 retries. Final exception: b'[Errno 28] No space left on device') for download of /cromwell_root/[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-rna/rnaseqStarFusion/[UNIQUE SUB WORKFLOW ID]/call-sequenceToTrimmedFastq/shard-3/sequenceToTrimmedFastq/[UNIQUE SUB WORKFLOW ID 2]/call-trimFastq/glob-[UNIQUE SUB WORKFLOW ID 3]/trimmed_read_2.fastq component 7.
@@ -152,7 +152,7 @@ CommandException: Some components of /cromwell_root/[GCS BUCKET]/cromwell-execut
 
 The most obvious indication that we have a space issue is: ` No space left on device'`. 
 
-To add more space for Kallisto we will edit the WDL for Kallisto on our VM. It may be helpful to go to the [github for the WDLs](https://github.com/wustl-oncology/analysis-wdls/tree/main) to help you find exactly where that task is located within the analysis-wdls file structure. Once you find the task you want to edit, we will change the amount of space needed. Within the WDLs `runtime` section, we pass the space needed to the `disks` attribute. These attributes tell the execution engine (Cromwell) what computational resources your task needs to run. In many of the pipeline's WDLs, the space needed is calculated in terms of the size of the files. Ususally this is sufficient, but if we have a space problem, we can increase the constant value.
+To add more space for Kallisto we will edit the WDL for Kallisto on our VM. It may be helpful to go to the [github for the WDLs](https://github.com/wustl-oncology/analysis-wdls/tree/main) to help you find exactly where that task is located within the analysis-wdls file structure. Once you find the task you want to edit, we will change the amount of space needed. Within the WDLs `runtime` section, we pass the space needed to the `disks` attribute. These attributes tell the execution engine (Cromwell) what computational resources your task needs to run. In many of the pipeline's WDLs, the space needed is calculated in terms of the size of the files. Usually this is sufficient, but if we have a space problem, we can increase the constant value.
 
 ```
 # open the WDL you want to edit in a text editor:
@@ -185,7 +185,7 @@ submit_workflow /shared/analysis-wdls/definitions/$WORKFLOW $YAML
 
 # Errors in Results
 
-Sometimes the problem is not that the pipeline does not complete sucessfully but that the results are not as expected. Here we will go through some possible scenarios on incorrect results and what to do about it.
+Sometimes the problem is not that the pipeline does not complete successfully but that the results are not as expected. Here we will go through some possible scenarios on incorrect results and what to do about it.
 
 ## Adjusting Other Parameters in the YAML
 
