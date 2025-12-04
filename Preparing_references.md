@@ -12,7 +12,7 @@ BASEDIR=/path/to/annotation_data_grch38_ens113
 ## Reference genome 
 #### fasta 
 
-We will use the 1000 genomes version of the human GRCh38 build. This reference includes extra decoy and HLA sequences in addition to the alternate haplotypes provided from the GRC consortium. 
+We will use the 1000 Genomes version of the human GRCh38 build. This reference includes extra decoy and HLA sequences in addition to the alternate haplotypes provided from the GRC consortium. 
 
 ```
 mkdir -p $BASEDIR/reference_genome
@@ -116,7 +116,7 @@ bwa-mem2 index all_sequences.fa
 mkdir -p $BASEDIR/aligner_indices/star_fusion/temp 
 cd $BASEDIR/aligner_indices/star_fusion/temp
 /usr/local/src/STAR-Fusion/ctat-genome-lib-builder/prep_genome_lib.pl --CPU 10 --genome_fa $BASEDIR/reference_genome/all_sequences.fa --gtf $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf --pfam_db current --dfam_db human --output_dir $BASEDIR/aligner_indices/star_fusion
-#based on logfile, this was unsuccessful => issue might be solved by entering a temporary directory but running hte rest of the command the same way. 
+#based on logfile, this was unsuccessful => issue might be solved by entering a temporary directory but running the rest of the command the same way. 
 # temp directory worked. Now just need to figure out which files to zip. Will use our actual starfusion.zip dir as reference; copying to temp_real_star_fusion_dir and unzipping.
 
 ```
