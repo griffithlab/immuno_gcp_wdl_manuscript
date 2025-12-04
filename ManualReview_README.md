@@ -813,60 +813,49 @@ the following IGV display settings are useful: ( 1 ) “View as pairs” and ( 2
 alignments by” - > “first-of-pair strand”. Note that to perform the transcript isoform review,
 it will be necessary to load the correct Ensembl GTF of transcripts in IGV. 
 
-**Long Peptide Extraction and Annotation**
+## Long Peptide Extraction and Final Report Generation
 
 Using the selected transcript, extract 51-mer peptide sequences that contain the candidate neoantigen. Annotate this sequence with the "best" class-I and class-II binding peptides. The selection of long peptide sequences chosen should reflect the final conclusion of the ITB review and genomics review.
 
-- Use `pvacseq generate_protein_fasta` to create a fasta file that has the long peptide sequences needed.
-- For convenience you can create two versions of the Fasta file:
-    1. One that has a mutant peptide sequence for every mutation that was evaluated "Accept,Review" during the ITB meeting and based only on the top transcript. This should be close to the final set of sequences you want.
-    2. One that has a mutant peptide sequence for every mutation, generated for every transcript. This may be needed to manually adjust the final set of peptides to account for transcript expression, alternative splicing, etc.
+Use `pvacseq create_peptide_ordering_form` to create a fasta file that has the long peptide sequences needed.
+These files are useful in the manual review process.
 
 An example of how this command would look:
 ```bash
+
+export PATIENT_ID="hcc1395"
+
+# Get the tumor sample ID from the annotated expression file
 gzcat $WORKING_BASE/final_results/annotated.expression.vcf.gz | less
 export TUMOR_SAMPLE_ID="hcc1395-tumor-exome"
 
-docker run -it --env WORKING_BASE --env TUMOR_SAMPLE_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/pvactools:5.4.0 /bin/bash
+docker run -it --env WORKING_BASE --env TUMOR_SAMPLE_ID --env PATIENT_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/pvactools:6.0.2 /bin/bash
 
 cd $WORKING_BASE/
 
-pvacseq generate_protein_fasta \
-      -p $WORKING_BASE/final_results/pVACseq/phase_vcf/phased.vcf.gz \
-      --pass-only --mutant-only -d 150 \
-      -s ${TUMOR_SAMPLE_ID} \
-      --aggregate-report-evaluation {Accept,Review} \
-      --input-tsv $WORKING_BASE/itb-review-files/*.tsv \
-      $WORKING_BASE/final_results/annotated.expression.vcf.gz \
-      25 \
-      $WORKING_BASE/generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa
- 
-pvacseq generate_protein_fasta \
-      -p  $WORKING_BASE/final_results/pVACseq/phase_vcf/phased.vcf.gz \
-      --pass-only --mutant-only -d 150 \
-      -s ${TUMOR_SAMPLE_ID} \
-      $WORKING_BASE/final_results/annotated.expression.vcf.gz \
-      25 \
-      $WORKING_BASE/generate_protein_fasta/all/annotated_filtered.vcf-pass-51mer.fa
+mkdir -p manual_review
+
+# This command generates a fasta file of 51mers for all candidates
+
+pvacseq create_peptide_ordering_form -o manual_review/  \
+                -p $WORKING_BASE/final_results/pVACseq/phase_vcf/phased.vcf.gz \
+                --pass-only -d 150 \
+                --aggregate-report-evaluation Accept,Reject,Pending,Review \
+                --classI-IC50=1000 --classI-percent=2 --classII-IC50=500 --classII-percent=2 --prob-pos C \
+                --allow-incomplete-transcripts \
+                $WORKING_BASE/final_results/annotated.expression.vcf.gz 25 \
+                $WORKING_BASE/itb-review-files/HCC1395_v140rc.Annotated.Neoantigen_Candidates.tsv \
+                $WORKING_BASE/final_results/pVACseq/mhc_ii/*.all_epitopes.aggregated.tsv \
+                ${PATIENT_ID} ${TUMOR_SAMPLE_ID}
 
 exit
 ```
 
-## Final Reporting
+> [!NOTE]  
+> During a normal review process, where you accept candidates in pVACview first duirng an ITB meeting, you will probabt only want to generate 51mers for the candidates marked "Accept" or "Review". Change the `--aggregate-report-evaluation` argument accordingly.
 
-Generate files for final reporting:
-
-```bash
-docker pull griffithlab/neoang_scripts
-docker run -it --env WORKING_BASE --env PATIENT_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/neoang_scripts /bin/bash
-
-cd $WORKING_BASE
-mkdir manual_review
-
-python3 /opt/scripts/generate_reviews_files.py -reviewed_candidates itb-review-files/*.tsv -peptides generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa.manufacturability.tsv  -classI final_results/pVACseq/mhc_i/*.all_epitopes.aggregated.tsv -classII final_results/pVACseq/mhc_ii/*.all_epitopes.aggregated.tsv -samp $PATIENT_ID -o ../manual_review/
-
-python3 /opt/scripts/color_peptides51mer.py -peptides ../manual_review/*Peptides_51-mer.xlsx -samp $PATIENT_ID -probPos C -cIIC50=1000 -cIpercent=2 -cIIIC50=500 -cIIpercent=2 -o ../manual_review/
-```
+> [!NOTE]  
+> The `allow-incomplete-transcripts` will not be necassary for pipeline runs using pVACseq v6 or greater, which will automatically exclude incomplete transcripts.
 
 ### 1. Peptide Fasta
 
