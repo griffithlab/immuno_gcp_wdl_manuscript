@@ -22,7 +22,7 @@ After completing the workflow, ALL resources used on the cloud can be destroyed.
 
 A brief note on command line sessions. Almost everything below will occur at the command line. It is very easy to get confused about the kind of sessions used. There are three types that will be used:
 1. A terminal session on your local system (e.g. using the Terminal App on a Mac laptop)
-2. Within session (1) you may launch a docker interative session (via `docker run -it`) to use tools we have created for setting up the workflow
+2. Within session (1) you may launch a docker interactive session (via `docker run -it`) to use tools we have created for setting up the workflow
 3. Within session (1) you may login (via `gcloud compute ssh`) to the Google Virtual Machine where Cromwell is running.
 
 ### Source of instructions
@@ -61,7 +61,7 @@ Note that, if needed, you can use the following docker image to access `gsutil` 
 Start by opening a Terminal session on your local system
 
 ### Set some Google Cloud and other environment variables
-The following environment variables are used merely for convenience and should be customized to produce intuitive labeling for your own analysis:
+The following environment variables are used merely for convenience and should be customized to produce intuitive labelling for your own analysis:
 
 ```bash
 export GCS_PROJECT=test-immuno # REPLACE WITH YOUR PROJECT NAME
@@ -110,7 +110,7 @@ gcloud config list
 ```
 
 ### Set up cloud service account, firewall settings, and storage bucket
-Run the following command and make note of the "Service Account" returned (e.g. "cromwell-server@test-immuno.iam.gserviceaccount.com"). Make sure this matches the value in $GCS_SERVICE_ACCOUNT (e.g. `echo $GCS_SERVICE_ACCOUNT`). If the project already exsists you will see errors but as long as the Service Account is returned then everything has executed correclty 
+Run the following command and make note of the "Service Account" returned (e.g. "cromwell-server@test-immuno.iam.gserviceaccount.com"). Make sure this matches the value in $GCS_SERVICE_ACCOUNT (e.g. `echo $GCS_SERVICE_ACCOUNT`). If the project already exists you will see errors but as long as the Service Account is returned then everything has executed correctly. 
 
 ```bash
 cd $WORKING_BASE/git/cloud-workflows/manual-workflows/
