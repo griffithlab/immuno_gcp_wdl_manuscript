@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-This repository contains the protocol and supporting materials for the ImmunoNX pipeline, a comprehensive workflow for predicting neoantigens. The manuscript (linked below) describes our computational pipeline (ImmunoNX) and rigorous manual immunogenomics review criteria for designing neoantigen vaccines. We also describe how to run the pipeline for an example HCC1395 cell line, and provide materials from our immunogenomics review.
+This repository contains the protocol and supporting materials for the ImmunoNX pipeline, a comprehensive workflow for predicting neoantigens. The manuscript (linked below) describes our computational pipeline (ImmunoNX) and rigorous manual immunogenomics review criteria for designing neoantigen vaccines. We also describe how to run the pipeline for an example HCC1395 cell line, and provide materials from our immunogenomics review of that cell line.
 
 ## Manuscript
 
