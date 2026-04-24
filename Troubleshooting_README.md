@@ -269,8 +269,3 @@ Sometimes a candidate has high read support, but when inspecting the RNA read sp
 Visual inspection often reveals that the best peptide, or more commonly 51mer sequence generated for pepetide manufactoring, need to be changed to fit what the data shows. For example, there might be a heterozygous germline variant that changes the sequence but was not caught by the pipeline's germline variant detector.
 
 Changes to the best peptide need to be checked by rerunning pVACseq to make sure that the peptide is still a strong and unproblematic binder. See the pVACseq documentation [here](https://pvactools.readthedocs.io/en/latest/pvacseq.html).
-
-
-```
-Aug 05 15:59:34 sidi-immuno-jlf-100-128 java[1744]: Failed to evaluate input 'data_size' (reason 1 of 1): [Attempted 1 time(s)] - StorageException: cromwell-server@jlf-rcrf.iam.gserviceaccount.com does not have storage.objects.get access to the Google Cloud Storage object. Permission 'storage.objects.get' denied on resource (or it may not exist).
-```
