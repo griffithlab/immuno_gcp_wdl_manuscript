@@ -1,4 +1,4 @@
-# Download ImmunoNX Example Inputs and Ouptus
+# Download ImmunoNX Example Inputs and Outputs
 
 This document describes how to obtain the input and output data from the ImmunoNX protocol.
 
