@@ -820,7 +820,8 @@ export PATIENT_ID="hcc1395"
 
 # Get the tumor sample ID from the annotated expression file
 gzcat $WORKING_BASE/final_results/annotated.expression.vcf.gz | less
-export TUMOR_SAMPLE_ID="hcc1395-tumor-exome"
+export TUMOR_SAMPLE_ID=$(cat $HOME/yamls/${GCS_CASE_NAME}_immuno_cloud-WDL.yaml | grep immuno.tumor_sample_name | cut -d ":" -f 2 | tr -d " " | tr -d \")
+
 
 docker run -it --env WORKING_BASE --env TUMOR_SAMPLE_ID --env PATIENT_ID -v $HOME/:$HOME/ -v $HOME/.config/gcloud:/root/.config/gcloud griffithlab/pvactools:6.0.2 /bin/bash
 
