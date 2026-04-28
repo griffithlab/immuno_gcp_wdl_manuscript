@@ -17,6 +17,7 @@ Link to supplementary files: [Zenodo](https://zenodo.org/records/17862140)
 - **[RunningPipeline_README.md](RunningPipeline_README.md)**: Step-by-step guide to running the Google Cloud implementation of the ImmunoNX pipeline using WDL workflows and Google Cloud Helper scripts.
 - **[ManualReview_README.md](ManualReview_README.md)**: Guidelines for quality control checks and manual review of pipeline results to pick neoantigen candidates for a vaccine design (or other downstream experiments).
 - **[Troubleshooting_README.md](Troubleshooting_README.md)**: Addresses common issues encountered during pipeline execution and manual review.
+- **[Download_ImmunoNX_Example_Data.md](Download_ImmunoNX_Example_Data.md)**: Instructions on how to download the HCC1395 example data we used to run ImmunoNX and the outputs we generated.
 
 ### Configuration and Examples
 - **[example_yamls/](example_yamls/)**: 
