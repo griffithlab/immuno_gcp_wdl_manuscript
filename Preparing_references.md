@@ -132,11 +132,11 @@ from the `google/cloud-sdk` image:
 
 ```
 mkdir $BASEDIR/known_variants
-gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf $BASEDIR/known_variants 
-gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz $BASEDIR/known_variants
-gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi $BASEDIR/known_variants
-gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz $BASEDIR/known_variants
-gsutil -m cp -r gs://genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi $BASEDIR/known_variants
+gsutil -m cp -r gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf $BASEDIR/known_variants /
+gsutil -m cp -r gs://gcp-public-data--broad-references/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz $BASEDIR/known_variants/
+gsutil -m cp -r gs://gcp-public-data--broad-references/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi $BASEDIR/known_variants/
+gsutil -m cp -r gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz $BASEDIR/known_variants/
+gsutil -m cp -r gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi $BASEDIR/known_variants/
 
 ```
 
