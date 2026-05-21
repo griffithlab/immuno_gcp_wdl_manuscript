@@ -97,7 +97,7 @@ cat $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz $BASEDIR/rna_
 
 #### bwa mem index 
 
-From docker image: `mgibio/alignment_helper-cwl:2.1.1`
+From docker image: `mgibio/alignment_helper-cwl:2.2.1`
 
 ```
 mkdir -p $BASEDIR/aligner_indices/bwamem_0.7.15 
