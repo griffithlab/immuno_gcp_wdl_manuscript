@@ -43,8 +43,8 @@ We will download the chromAlias file from UCSC genome browser and restrict it to
 
 ```
 wget -O $BASEDIR/reference_genome/chromAlias.txt.gz https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/chromAlias.txt.gz
-zgrep 'ensembl' chromAlias.txt.gz > chromAlias.ensembl.txt
-rm chromAlias.txt.gz
+zgrep 'ensembl' $BASEDIR/reference_genome/chromAlias.txt.gz > $BASEDIR/reference_genome/chromAlias.ensembl.txt
+rm $BASEDIR/reference_genome/chromAlias.txt.gz
 ```
 
 ## Ensembl/VEP annotation files
