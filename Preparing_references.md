@@ -158,7 +158,7 @@ This command downloads the V3 of the genome [Gnomad Database](https://gnomad.bro
 
 ```
 #Download gnomad V3 VCFs for each chromosome, concatenate, and filter to AF>0.001.
-mkdir $BASEDIR/known_variants/gnomad_temp
+mkdir $BASEDIR/known_variants/gnomad_temp && cd "$_"
 # Step 1: Download VCFs
 for chr in {1..22} X Y; do
   wget https://ftp.ensembl.org/pub/data_files/homo_sapiens/GRCh38/variation_genotype/gnomad/v3.1.2/gnomad.genomes.v3.1.2.sites.chr${chr}_trimmed_info.vcf.bgz
