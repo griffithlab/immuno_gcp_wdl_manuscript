@@ -139,6 +139,8 @@ To view your current quotas in the Console:
 | In-use IP addresses | us-central1 | 25 |
 | Persistent Disk SSD (GB) | us-central1 | 10,000 GB |
 
+> **Note on CPUs:** Default is 200 already. 
+> 
 > **Note on Persistent Disk SSD:** For smaller test datasets, the default 
 > 500 GB limit may be sufficient. However, for full-scale datasets  
 > any increase might be needed (10 TB is a ceiling value). If the "Edit Quotas" button is greyed out 
