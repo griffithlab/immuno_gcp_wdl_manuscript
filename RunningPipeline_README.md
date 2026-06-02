@@ -54,6 +54,162 @@ Example quotas you might need to request:
 - `In-use IP addresses` -> `us-central1` -> `25`
 - `Persistent Disk SSD (GB)` -> `us-central1` -> `10 TB`
 
+### Setup Reminders for New Users
+
+If this is your first time using Google Cloud, the following steps must be 
+completed before running any pipeline commands.
+
+#### 1. Set Your Project ID
+
+Your Google Cloud **Project ID** is not the same as your project's display 
+name. The Project ID is a unique identifier (e.g. `my-project-123456`) and 
+is what all `gcloud` commands use. Find it and set it as your activate project:
+
+```bash
+gcloud projects list
+
+gcloud config set project YOUR_PROJECT_ID
+export GCS_PROJECT=YOUR_PROJECT_ID
+
+gcloud config get-value project # Verify it was set correctly
+```
+You can alo find the Project ID in the Google Cloud Console, it is visible in the 
+project selector dropdown at the top left, listed beneath the display name.
+
+#### 2. Link a Billing Account to Your Project
+
+Billing must be linked to your project before any Google Cloud services 
+(including Compute Engine) can be enabled. If billing is not linked, all 
+`gcloud services enable` commands will fail with a `FAILED_PRECONDITION` error.
+
+To link billing:
+
+1. Go to: `https://console.cloud.google.com/billing/linkedaccount?project=YOUR_PROJECT_ID`
+2. Click **"Link a billing account"**
+3. Select your billing account and click **"Set account"**
+
+Verify billing is active from the command line:
+
+```bash
+gcloud beta billing projects describe $GCS_PROJECT
+```
+You should see `billingEnabled: true` in the output before proceeding.
+
+#### 3. Enable Required APIs
+
+Google Cloud requires you to explicitly enable APIs before using them. 
+For this pipeline, the Compute Engine API must be enabled — this allows 
+your project to create and manage virtual machines (VMs), which Cromwell 
+uses to run each step of the pipeline. Without this, no worker VMs can 
+be created and the pipeline will not run.
+
+Enable the Compute Engine API:
+
+```bash
+gcloud services enable compute.googleapis.com --project=$GCS_PROJECT
+```
+
+This may take 1-2 minutes to propagate. Verify it worked:
+
+```bash
+gcloud compute regions describe us-central1 --project=$GCS_PROJECT
+```
+
+If successful, this will return a list of quota values for your project 
+in `us-central1`.
+
+### 4. Request Quota Increases
+
+Google Cloud enforces limits on resources like CPUs, IP addresses, and 
+disk space. New accounts have low default quotas that will cause this 
+pipeline to fail. You should request increases before starting a run.
+
+To view your current quotas in the Console:
+
+1. Go to: `https://console.cloud.google.com/iam-admin/quotas?project=YOUR_PROJECT_ID`
+2. Change the **"Quota type"** filter from "Quotas with usage" to **"All quotas"**
+   (new accounts have zero usage, so quotas won't appear otherwise)
+3. Search for each quota below, check the box next to it, and click 
+   **"Edit Quotas"** to request an increase
+
+| Quota Name | Region | Recommended Value |
+|---|---|---|
+| CPUs | us-central1 | 100 |
+| Preemptible CPUs | us-central1 | 100 |
+| In-use IP addresses | us-central1 | 25 |
+| Persistent Disk SSD (GB) | us-central1 | 10,000 GB |
+
+> **Note on Persistent Disk SSD:** For smaller test datasets, the default 
+> 500 GB limit may be sufficient. However, for full-scale datasets  
+> any increase might be needed (10 TB is a ceiling value). If the "Edit Quotas" button is greyed out 
+> for this quota (common on new accounts), submit a request directly to 
+> Google Cloud Support.
+
+Quota increases for CPUs and IP addresses are often auto-approved within 
+minutes. Persistent Disk SSD requests may take 1-2 business days.
+
+You can also verify current quota values at any time from the command line:
+
+```bash
+gcloud compute regions describe us-central1 --project=$GCS_PROJECT
+```
+
+#### 5. Set an IP Address Range for Your Project (Firewall Rules)
+
+When initializing your project with `resources.sh`, the script creates 
+firewall rules that control which IP addresses are allowed to SSH into 
+your Cromwell VM. You must specify an IP range using the `--ip-range` flag:
+
+```bash
+cd $WORKING_BASE/git/cloud-workflows/manual-workflows/
+bash resources.sh init-project \
+  --project $GCS_PROJECT \
+  --bucket $GCS_BUCKET_NAME \
+  --ip-range 0.0.0.0/0
+```
+
+
+**Understanding your options:**
+
+- `--ip-range 0.0.0.0/0` — Allows SSH access from any IP address. This is 
+  the simplest option and is acceptable for a short-lived test run, but is 
+  less secure.
+- `--ip-range YOUR_IP/32` — Restricts SSH access to a single IP address 
+  (your own). This is the more secure approach and is recommended if you 
+  are working from a fixed location such as an office or institutional network.
+
+To find your current public IP address:
+
+```bash
+curl ifconfig.me
+```
+
+Then use it as your IP range:
+
+```bash
+bash resources.sh init-project \
+  --project $GCS_PROJECT \
+  --bucket $GCS_BUCKET_NAME \
+  --ip-range YOUR_IP/32
+```
+
+> **Note:** If you are working from multiple locations (e.g. home and 
+> office) or your IP address changes, you can specify a broader range 
+> (e.g. your institution's subnet) or update the firewall rules in the 
+> Google Cloud Console under **VPC Network → Firewall**.
+
+#### 6. Set Your Compute Zone
+
+Google Cloud organizes compute resources into regions (e.g. `us-central1`) 
+and zones within those regions (e.g. `us-central1-a`, `us-central1-b`, 
+`us-central1-c`, `us-central1-f`). Your Cromwell VM and all worker VMs 
+will be created in whatever zone is set as your default. T
+Set your default zone:
+
+```bash
+gcloud config set compute/zone us-central1-c
+```
+
 ### Interacting with Google buckets from your local system
 Note that, if needed, you can use the following docker image to access `gsutil` for exploration of your google storage: `docker(google/cloud-sdk)`. Or alternatively, you can install the Google Cloud SDK on your system. This latter approach is assumed by the following instructions.
 
