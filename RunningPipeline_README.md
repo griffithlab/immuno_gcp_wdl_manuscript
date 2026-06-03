@@ -12,7 +12,7 @@ environment and all the inputs will be staged to this cloud environment. Next, C
 Some steps are run within docker containers. It therefore requires that you can run interactive docker sessions on your system.
 
 You will interact with the Google Cloud in several ways:
-1. From your local system using command line tools, including `gcloud` and `gsutil`.
+1. From the local system using command line tools, including `gcloud` and `gsutil`.
 2. We will create a Google Virtual Machine (VM) and start a Cromwell service on it. You will then login to this VM and perform some commands and monitor workflow progress there. Cromwell on this VM will orchestrate the creation and use of many additional worker VMs that complete all the compute tasks of the workflow.
 3. The Google Cloud Console in your web browser may be used to visualize/monitor the usage of cloud resources. In the Console, you will see the most relevant resources in the "Cloud Storage" and "Compute Engine" sections.
 
@@ -46,7 +46,8 @@ Some notes on account setup once you are logged in:
 - Choose a name for the Google bucket that will be used for this tutorial. Note that you don't need to create it in the console because this will be handled automatically for you below. We will use the bucket name 'test-immuno-pipeline' below.
  
 Some notes on quotas:
-- If you have not been using your account for high-performance computing, it is likely that the quotas in place will cause the very large immuno.wdl workflow to fail. For example, you may not be able to use enough CPUs, IP addresses and disk space at once to get the workflow to run. If you see errors that mention quotas, or sound like fundamental network failures, check your quotas in the Google Cloud Console (IAM & Admin -> Quotas) and work with your Google account contact to increase your quotas. If your institution has already been using Google Cloud in any serious way, this is less likely to be a problem. 
+- If you have not been using your account for high-performance computing, it is likely that the quotas in place will cause the very large immuno.wdl workflow to fail. For example, you may not be able to use enough CPUs, IP addresses and disk space at once to get the workflow to run. If you see errors that mention quotas, or sound like fundamental network failures, check your quotas in the Google Cloud Console (IAM & Admin -> Quotas) and work with your Google account contact to increase your quotas. If your institution has already been using Google Cloud in any serious way, this is less likely to be a problem.
+- Additional information about setting quotas is provided below.
 
 Example quotas you might need to request:
 - `cpus` -> `us-central1` -> `100`
@@ -63,7 +64,7 @@ completed before running any pipeline commands.
 
 Your Google Cloud **Project ID** is not the same as your project's display 
 name. The Project ID is a unique identifier (e.g. `my-project-123456`) and 
-is what all `gcloud` commands use. Find it and set it as your activate project:
+is what all `gcloud` commands use. Find it and set it as your active project:
 
 ```bash
 gcloud projects list
@@ -73,7 +74,7 @@ export GCS_PROJECT=YOUR_PROJECT_ID
 
 gcloud config get-value project # Verify it was set correctly
 ```
-You can alo find the Project ID in the Google Cloud Console, it is visible in the 
+You can also find the Project ID in the Google Cloud Console. It is visible in the 
 project selector dropdown at the top left, listed beneath the display name.
 
 #### 2. Link a Billing Account to Your Project
@@ -128,7 +129,7 @@ To view your current quotas in the Console:
 
 1. Go to: `https://console.cloud.google.com/iam-admin/quotas?project=YOUR_PROJECT_ID`
 2. Change the **"Quota type"** filter from "Quotas with usage" to **"All quotas"**
-   (new accounts have zero usage, so quotas won't appear otherwise)
+   (new accounts have zero usage, so quotas don't appear by default)
 3. Search for each quota below, check the box next to it, and click 
    **"Edit Quotas"** to request an increase
 
@@ -139,13 +140,13 @@ To view your current quotas in the Console:
 | In-use IP addresses | us-central1 | 25 |
 | Persistent Disk SSD (GB) | us-central1 | 10,000 GB |
 
-> **Note on CPUs:** Default is 200 already. 
+> **Note on CPUs:** Default is already 200. 
 > 
 > **Note on Persistent Disk SSD:** For smaller test datasets, the default 
 > 500 GB limit may be sufficient. However, for full-scale datasets  
-> any increase might be needed (10 TB is a ceiling value). If the "Edit Quotas" button is greyed out 
+> an increase might be needed (10 TB is a ceiling value). If the "Edit Quotas" button is greyed out 
 > for this quota (common on new accounts), submit a request directly to 
-> Google Cloud Support.
+> Google Cloud Support. (Note: This was not necessary for our test runs on the HCC1395 example dataset.)
 
 Quota increases for CPUs and IP addresses are often auto-approved within 
 minutes. Persistent Disk SSD requests may take 1-2 business days.
@@ -178,7 +179,7 @@ bash resources.sh init-project \
   less secure.
 - `--ip-range YOUR_IP/32` — Restricts SSH access to a single IP address 
   (your own). This is the more secure approach and is recommended if you 
-  are working from a fixed location such as an office or institutional network.
+  are working from a location with a fixed IP address such as an office or institutional network.
 
 To find your current public IP address:
 
@@ -205,15 +206,15 @@ bash resources.sh init-project \
 Google Cloud organizes compute resources into regions (e.g. `us-central1`) 
 and zones within those regions (e.g. `us-central1-a`, `us-central1-b`, 
 `us-central1-c`, `us-central1-f`). Your Cromwell VM and all worker VMs 
-will be created in whatever zone is set as your default. T
-Set your default zone:
+will be created in whatever zone is set as your default. 
+To set your default zone:
 
 ```bash
 gcloud config set compute/zone us-central1-c
 ```
 
 ### Interacting with Google buckets from your local system
-Note that, if needed, you can use the following docker image to access `gsutil` for exploration of your google storage: `docker(google/cloud-sdk)`. Or alternatively, you can install the Google Cloud SDK on your system. This latter approach is assumed by the following instructions.
+Note that, if needed, you can use the following docker image to access `gsutil` for exploration of your google storage: `docker(google/cloud-sdk)`. Or alternatively, you can install the Google Cloud SDK on your system. The following instructions assume the latter.
 
 ## Step-by-step instructions
 Start by opening a Terminal session on your local system
@@ -235,7 +236,7 @@ export LOCAL_YAML=${SAMPLE}_immuno_local-WDL.yaml
 export CLOUD_YAML=${SAMPLE}_immuno_cloud-WDL.yaml
 ```
 
-NOTE: You will need to manually create the Google billing project in the console before proceeding
+NOTE: You will need to manually create the Google billing project in the console before proceeding. 
 
 ## Local setup
 
