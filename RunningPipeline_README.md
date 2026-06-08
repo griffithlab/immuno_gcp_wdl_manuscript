@@ -1,19 +1,21 @@
-# Running the WASHU Immunogenomics Workflow on Google Cloud - public version
+# Running the ImmunoNX Workflow on Google Cloud - public version
 
 ## Preamble
-This tutorial demonstrates how to run the WASHU immunogenomics pipeline (immuno.wdl) on Google Cloud.
+This tutorial demonstrates how to run the ImmunoNX immunogenomics pipeline (immuno.wdl) on Google Cloud.
 
-The same principles described in this tutorial should work for any of our collection of WDL files found here: https://github.com/griffithlab/analysis-wdls.
+The same principles described in this tutorial should work for any of our collection of WDL files found here: https://github.com/wustl-oncology/analysis-wdls.
 
 This workflow run will be accomplished by first setting up workflow definitions, input data and 
 reference files, and a YAML config file on a user's local system. The user will also set up a Google Cloud 
-environment and all the inputs will be staged to this cloud environment. Next, Cromwell will be used to execute the pipeline using the specified input and reference files, and finally, the results will be pulled back to the local system and cloud resources will be cleaned up. 
+environment and all the inputs will be staged to this cloud environment. Next, Cromwell will be used to execute 
+the pipeline using the specified input and reference files, and finally, the results will be pulled back to the 
+local system and cloud resources will be cleaned up. 
 
 Some steps are run within docker containers. It therefore requires that you can run interactive docker sessions on your system.
 
 You will interact with the Google Cloud in several ways:
 1. From the local system using command line tools, including `gcloud` and `gsutil`.
-2. We will create a Google Virtual Machine (VM) and start a Cromwell service on it. You will then login to this VM and perform some commands and monitor workflow progress there. Cromwell on this VM will orchestrate the creation and use of many additional worker VMs that complete all the compute tasks of the workflow.
+2. We will create a Google Virtual Machine (VM) and start a Cromwell service on it. You will then login to this VM and perform some commands and monitor workflow progress there. Cromwell on this VM will orchestrate the creation and use of many additional worker VMs that complete all the compute heavy tasks of the workflow.
 3. The Google Cloud Console in your web browser may be used to visualize/monitor the usage of cloud resources. In the Console, you will see the most relevant resources in the "Cloud Storage" and "Compute Engine" sections.
 
 This version assumes that you are staging your input data files from your local system (e.g. a laptop, but could be any system really). All input files will be staged to a Google Storage Bucket. During the workflow, all results files will also be stored in this Bucket. At the end of the tutorial the final results will be copied back to your local system.
