@@ -37,7 +37,7 @@ immuno.rna_sequence:
       fastq2: "[path to the tumor RNA read 2 file locally (on laptop/server)]"
     readgroup: "ID:tumor_rna\tPU:[Flow cell ID]\tSM:[tumor RNA sample name]\tLB:[tumor RNA library name]\tPL:[sequencing platform]\tCN:[data center]"
 immuno.sample_name: "[tumor RNA sample name]"
-immuno.strand: "" # first or second or unstranded
+immuno.strand: "" # first or second or unstranded (select "first" for HCC1395 tutorial)
 # Information about strandedness: https://rnabio.org/module-09-appendix/0009/12/01/StrandSettings/
 
 # ------------- CLE validated variants for intersection/filtering --------------------
@@ -48,14 +48,14 @@ immuno.strand: "" # first or second or unstranded
 # Source of HLA types for this sample: Histogenetics typing
 # Information on formatting HLA alleles for pVACtools in list valid alleles: https://pvactools.readthedocs.io/en/latest/pvacseq/additional_commands.html 
 
-immuno.clinical_mhc_classI_alleles:
+# immuno.clinical_mhc_classI_alleles:
 #- HLA-A*XX:XX
 #- HLA-A*YY:YY
 #- HLA-B*40:01
 #- HLA-B*51:01
 #- HLA-C*03:04
 #- HLA-C*15:02
-immuno.clinical_mhc_classII_alleles:
+# immuno.clinical_mhc_classII_alleles:
 #- DRB1*XX:YY
 #- DQA1*XX:YY
 
