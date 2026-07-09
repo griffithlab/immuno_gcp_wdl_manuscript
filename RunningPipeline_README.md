@@ -396,10 +396,10 @@ gsutil cp $GCS_BUCKET_PATH/yamls/$CLOUD_YAML .
 While logged into the Google Cromwell VM instance:
 ```bash
 source /shared/helpers.sh
-submit_workflow /shared/analysis-wdls/definitions/immuno.wdl $CLOUD_YAML
+submit_workflow /shared/analysis-wdls/definitions/immuno.wdl $CLOUD_YAML > workflow_id.txt
 
 ```
-Once the workflow is submitted, it will generate a unique Workflow ID that can be used to track your run's progress. While this workflow ID can be retrieved, we recommend that you make a note of this workflow ID at this stage.
+Once the workflow is submitted, it will generate a unique Workflow ID that can be used to track your run's progress. While this workflow ID can be retrieved, we recommend that you make a note of this workflow ID at this stage by saving it to a file on the VM.
 
 ### Monitor progress of the workflow run:
 
