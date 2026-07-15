@@ -629,9 +629,9 @@ CLE pipeline
 
 **pVACseq Review Files**
 
-- **$sample-name.all_epitopes.aggregated.tsv** (Class I)
-- **$sample-name.all_epitopes.aggregated.metrics.json** (Class I)
-- **$sample-name.all_epitopes.aggregated.tsv** (Class II)
+- **pVACseq/mhc_i/$sample-name.all_epitopes.aggregated.tsv** (Class I)
+- **pVACseq/mhc_i/$sample-name.all_epitopes.aggregated.metrics.json** (Class I)
+- **pVACseq/mhc_ii/$sample-name.all_epitopes.aggregated.tsv** (Class II)
 - Cancer Gene Census List in TSV format downloaded from Cosmic
 
 **IGV Review Files**
