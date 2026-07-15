@@ -514,3 +514,23 @@ Finally, we recommend you perform a survey of Cloud Storage and Compute Engine s
 
 ### Final Results File Structure and Description
 
+**Final Outputs/**
+- **Annotated VCFs** (somatic variant positions to load into IGV)
+- **Annotated variants** (human-readable file with details on somatic variants)
+- **Tumor CRAM** (tumor DNA alignments to load into IGV)
+- **Normal CRAM** (normal DNA alignments to load into IGV)
+- **QC/**
+  - This folder contains sequencing and alignment metrics. 
+- **Somatic/**
+  - This folder contains somatic variant calls, including copy number variants.
+- **Germline/**
+  - This folder contains germline variant calls.
+- **hla_typing/**
+  - This folder contains HLA calls from individual algorithms and consensus calls which are used for neoantigen prediction
+- **rnaseq/**
+  - This folder contains RNA alignments and fusion detection.
+- **pVACseq/**
+  - This folder contains the predicted neoantigen candidates for both classI (mhc_i/) and classII HLA alleles (mhc_ii/). This folder contains files which can be loaded into pVACview.
+- **pVACfuse/**
+  - This folder contains the predicted neoantigen candidates for fusion candidates for both classI and classII HLA alleles. 
+
