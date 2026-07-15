@@ -413,6 +413,12 @@ export WORKFLOW_ID=<id from above>
 curl http://localhost:8000/api/workflows/v1/$WORKFLOW_ID/status
 ```
 
+Note that if you have been testing and have several workflows that have been run on the same server it can get confusing to tell which workflow is which and in what order they were started. The following command will parse the cromwell log for records of workflows that were started, in order and at what time:
+
+```bash
+journalctl -u cromwell | grep "Starting workflow UUID" | perl -ne 'if ($_ =~ /(\w+\s+\d+\s+\d+\:\d+\:\d+).*UUID\((\S+)\)/){print "$2\tstarted $1\n"}'
+```
+
 Once a run has completed successfully, the end of the log file will display a message similar to:
 ```
 Jul 31 16:54:00 hcc1395-immuno-test java[1739]: 2025-07-31 16:54:00 cromwell-system-akka.dispatchers.engine-dispatcher-9995 INFO  - WorkflowManagerActor: Workflow actor for 9c706ccd-4047-4f31-8927-5f0fec558156 completed with status 'Succeeded'. The workflow will be removed from the workflow store.
