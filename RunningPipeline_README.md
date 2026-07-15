@@ -511,3 +511,6 @@ You can empty the cloud bucket either in the Web Console or using commands like 
 
 Finally, we recommend you perform a survey of Cloud Storage and Compute Engine sections in the Google Cloud Web Console to make sure everything has been cleaned up successfully.
 
+
+### Final Results File Structure and Description
+
