@@ -57,6 +57,9 @@ Example quotas you might need to request:
 - `In-use IP addresses` -> `us-central1` -> `25`
 - `Persistent Disk SSD (GB)` -> `us-central1` -> `10 TB`
 
+### Data governance and security
+Users are responsible for compliance with their local requirements and should consult their institutional, legal and compliance teams when executing this pipeline on sensitive patient data. Here, we describe the measures used in our deployment of ImmunoNX for reference. Institutional use of cloud resources is governed by a Business Associates Agreement established through a cloud services reseller. Network access to compute instances is restricted to SSH connections from institution-controlled IP addresses (resources.sh). Compute resources are transient, provisioned only for the duration of case processing. Sequencing data is held in private cloud storage buckets on which public access protection (PAP) is set automatically during setup (resources.sh). User access uses federated authentication managed by the institution, and project-scoped Identity and Access Management (IAM) permissions provide granular control of user privileges. Cloud resources accessed through institutional accounts are subject to institutional security monitoring, including threat and vulnerability detection platforms (e.g Orca).
+
 ### Setup Reminders for New Users
 
 If this is your first time using Google Cloud, the following steps must be 
