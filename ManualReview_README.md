@@ -738,9 +738,8 @@ sequence
 in CBioPortal after selecting studies that match the cancer type of the patient
 
 **HLA allele review for sample/data mixup**
-Make sure the HLA alleles as being used in pVACview for the final selection of candidate match
-up with those expected for the case based on Optitype/PHLAT predictions from the data and
-clinical HLA typing results if available.
+
+Decide whether the HLA alleles used for neoantigen prediction are believable and support strong vaccine design. Clinical HLA typing is preferred and will be used for neoantigen predictions. However if not available, the pipeline will use class I HLA alleles from Optitype, most class II HLA alleles from PHLAT,  and the DPA1/DPB1/DRB3/DRB4/DRB5 alleles from HLA-HD (as PHLAT does not provide predictions for those). The consensus list of HLA alleles determined by the pipeline is based on the normal samples. However,we also run the in-silico HLA typing algorithms on the tumor samples, and users can use these to verify that the normal and tumor samples are from the same individual. Additionally, they can also determine if any HLA alleles have been lost and should therefore be avoided when prioritizing neoantigens for the vaccine design.
 
 **Review multi-algorithm support for strong binding affinity**
 We are often using the “lowest” score method to prioritize candidates (the other, more
