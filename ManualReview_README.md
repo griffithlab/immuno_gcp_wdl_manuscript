@@ -1,6 +1,7 @@
 # Immunogenomics Review 
 
-The purpose of the immunogenomics review is to confirm that the results of the ImmunoNX pipeline are correct. This process involves checking if the output contains the correct files, reviewing quality control (QC) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools: **IGV** and **pVACview**, to manually verify the neoantigen candidates. These steps help ensure that high confidence neantigen candidates are selected.
+The purpose of the immunogenomics review is to confirm that the results of the ImmunoNX pipeline are correct. This process involves checking if the output contains the correct files, reviewing quality control (QC) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools: **pVACview** and **IGV**, to manually verify the neoantigen candidates. These steps help ensure that high confidence neantigen candidates are selected.
+Users wishing to explore pVACview are encouraged to visit its website https://pvacview.org/ to understand its full capabilities. The ‘Load Demo Data’ option on the home page, automatically loads files from the HCC1395 example dataset described in this protocol. (Note that the website version is based on the latest release of pVACtools, which may be different from the version you are using. In this case, some of the features and interface may look different, however the general functionality will be the same). 
 
 ## Initial review of ImmunoNX Pipeline Outputs
 
