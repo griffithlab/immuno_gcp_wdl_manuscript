@@ -642,8 +642,8 @@ CLE pipeline
 - **normal.cram** - > Normal exome DNA alignments to load into IGV
 - **tumor.cram** - > Tumor exome DNA alignments to load into IGV
 - **rnaseq/alignments/MarkedSorted.bam** - > Tumor RNA-seq alignments to load into IGV
-- **Ensembl 105 _GRCh 38 _UcscGenePred_Custom_Coding.ensGene** - > custom transcript
-annotation track containing only transcripts acceptable for neoantigen identification
+- **gs://griffith-lab-workflow-inputs/human_GRCh38_ens105/annotation_files_for_review/Ensembl105_GRCh38_UcscGenePred_Custom_Coding.ensGene** - > custom transcript
+annotation track containing only transcripts acceptable for neoantigen identification, any `.gtf` file will work here
 
 
 ## Genomics Review Checklist/Principles
