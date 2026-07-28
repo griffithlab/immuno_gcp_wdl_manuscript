@@ -622,7 +622,7 @@ Once the ITB meeting is complete and the preliminary set of candidates has been 
 genomics review of all candidates must be completed following the procedures and criteria laid
 out below.
 
-### Example Location of Files Needed for Genomics Review
+### Location of Files Needed for Genomics Review
 
 **Variants Review Files**
 
