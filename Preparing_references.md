@@ -83,7 +83,7 @@ perl convertEnsemblGTF.pl $BASEDIR/reference_genome/all_sequences.dict $BASEDIR/
 
 #### Transcriptome cDNA reference 
 
-Note that we're not going to convert these coordinates from [1,2,3] to [chr1,chr2,chr3], since Kallisto doesn't include coordinates in it's output.  If pseudobams from kallisto are desired, that conversion would need to be done. We will get both the coding (cdna) and non-coding (ncrna) files and combine them.
+Note that we're not going to convert these coordinates from [1,2,3] to [chr1,chr2,chr3], since Kallisto doesn't include coordinates in its output.  If pseudobams from kallisto are desired, that conversion would need to be done. We will get both the coding (cdna) and non-coding (ncrna) files and combine them.
 
 ```
 wget -O $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz
@@ -116,8 +116,6 @@ bwa-mem2 index all_sequences.fa
 mkdir -p $BASEDIR/aligner_indices/star_fusion/temp 
 cd $BASEDIR/aligner_indices/star_fusion/temp
 /usr/local/src/STAR-Fusion/ctat-genome-lib-builder/prep_genome_lib.pl --CPU 10 --genome_fa $BASEDIR/reference_genome/all_sequences.fa --gtf $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.113.gtf --pfam_db current --dfam_db human --output_dir $BASEDIR/aligner_indices/star_fusion
-#based on logfile, this was unsuccessful => issue might be solved by entering a temporary directory but running the rest of the command the same way. 
-# temp directory worked. Now just need to figure out which files to zip. Will use our actual starfusion.zip dir as reference; copying to temp_real_star_fusion_dir and unzipping.
 
 ```
 

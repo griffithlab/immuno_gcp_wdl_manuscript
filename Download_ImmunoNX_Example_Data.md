@@ -73,4 +73,4 @@ tar -xvf Exome_Norm.tar
 tar -xvf Exome_Tumor.tar 
 tar -xvf RNAseq_Tumor.tar
 ```
-Note that these files are >100GB combined
+Please note that altogether these files are ~100GB.

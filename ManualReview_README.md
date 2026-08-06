@@ -1,8 +1,8 @@
 # Immunogenomics Review 
 
-The purpose of the immunogenomics review is to confirm that the results of the ImmunoNX pipeline are correct. This process involves checking if the output contains the correct files, reviewing quality control (QC) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools: **pVACview** and **IGV**, to manually verify the neoantigen candidates. These steps help ensure that high confidence neantigen candidates are selected.
+The purpose of the immunogenomics review is to confirm that the results of the ImmunoNX pipeline are correct. This process involves checking if the output contains the correct files, reviewing quality control (QC) metrics, creating a written report, presenting results to a panel of experts, and using visualization tools: **pVACview** and **IGV**, to manually verify the neoantigen candidates. These steps help ensure that high confidence neoantigen candidates are selected.
 
-Users wishing to explore pVACview are encouraged to visit its website https://pvacview.org/ to understand its full capabilities without running the entire pipeline. The ‘Load Demo Data’ option on the home page automatically loads files from the HCC1395 example dataset described in this protocol. (Note that the website version is based on the latest pVACtools release, which may be different from the version you are using. In this case, the interface and some features may look different, however the general functionality will be the same). 
+Users wishing to explore pVACview are encouraged to visit its website https://pvacview.org/ to understand its full capabilities without running the entire pipeline. The ‘Load Demo Data’ option on the home page automatically loads files from the HCC1395 example dataset described in this protocol. (Note that the website version is based on the latest pVACtools release, which may be different from the version you are using. In this case, the interface and some features may look different; however, the general functionality will be the same). 
 
 ## Initial review of ImmunoNX Pipeline Outputs
 
@@ -14,18 +14,18 @@ HLA typing results, QC report files, and pVACseq/pVACview results file.
 
 ### Creating an Immunogenomic Review Report
 
-For our vaccine clinical trials, we have found creating a document to organize notes during the Immunogenomics Review is helpful because the review is a very manual process. These instructions outline how to create a similar report. After verifying that the data files look relatively normal. The structure of this report also provides a roadmap of how to conduct a manual review of candidates. 
+For our vaccine clinical trials, we have found that creating a document to organize notes during the Immunogenomics Review is helpful because the review is a very manual process. These instructions outline how to create a similar report. The structure of this report also provides a roadmap to carry out the manual review of candidates. 
 
 The structure of this report is:
 1. Introduction: a brief description of the patient's history, where the data comes from, and/or what results are expected.
 2. Files Used: a list of Google Bucket paths (or local paths if the final outputs will be stored locally) pointing to the files used for pVACview and IGV.
 3. Basic data QC Review: QC metrics used to evaluate basic data quality.
-6. HLA allele review: A comparison between HLA allele predictions between different algorithms and (if included) clinical HLA typing. This is important because we do not want to predict candidates for alleles that are not in the patient.
-7. Review of multi-algorithm support for strong binding affinity: A description of the predicted binding affinity of candidates of interest. This section contains detailed notes of the review done using pVACview.
-8. Tumor type / driver variant review: What variants we expect to see and if they are known to drive tumor progression. These will be important neoantigen candidates to prioritize.
-9. Fusion review: Fusion candidates that need further review.
-10. Comparison to orthogonal variant calls: a comparison of the pipeline's variant calls to another source of variant information (if included).
-11. IGV review: This section is dedicated to the final stage for visually verifying the candidates of interest in IGV. Often this section functions as a conclusion for the immunogenomics review. It details how many candidates were reviewed, which candidates got rejected and why, and other interesting or concerning things of note from the case.
+4. HLA allele review: A comparison between HLA allele predictions between different algorithms and (if included) clinical HLA typing. This is important because we do not want to predict candidates for alleles that are not in the patient.
+5. Review of multi-algorithm support for strong binding affinity: A description of the predicted binding affinity of candidates of interest. This section contains detailed notes of the review done using pVACview.
+6. Tumor type / driver variant review: What variants we expect to see and if they are known to drive tumor progression. These will be important neoantigen candidates to prioritize.
+7. Fusion review: Fusion candidates that need further review.
+8. Comparison to orthogonal variant calls: a comparison of the pipeline's variant calls to another source of variant information (if included).
+9. IGV review: This section is dedicated to the final stage for visually verifying the candidates of interest in IGV. Often this section functions as a conclusion for the immunogenomics review. It details how many candidates were reviewed, which candidates got rejected and why, and other interesting or concerning things of note from the case.
 
 We have created several scripts to aid in the generation of these lists of metrics
 
@@ -61,8 +61,8 @@ python3 /opt/scripts/get_FDA_thresholds.py -WB  $WORKING_BASE -f final_results
 <img width="589" height="680" alt="Example Mock FDA Metrics" src="https://github.com/user-attachments/assets/dcdad32c-aede-4a8f-8517-d272dace263b" />
 
 >[!WARNING]
-> Although the script is called `get_FDA_thresholds.py` These are not approved or verified metrics.
->These are strigent thresholds which we use to verify the quality of the data.
+> Although the script is called `get_FDA_thresholds.py`, these are not FDA approved or verified metrics.
+>These are stringent thresholds which we use to verify the quality of the data.
 
 
 #### Generating a Table to summarize HLA predictions
@@ -89,7 +89,7 @@ ImmunoNX pipeline and saved as results. These consist of:
 - $sample-name.all_epitopes.aggregated.tsv (Class II)
 - Cancer Gene List in TSV format with Genes in the first column
 
-Before the ITB meeting. Load these files in pVACview and make sure everything is working.
+Before the ITB meeting, load these files in pVACview and make sure everything loads properly.
 
 During the meeting the “Evaluation” column will be used to mark each Pending candidate as
 Accept, Review, or Reject until sufficient candidates have been identified (some lower priority
@@ -100,8 +100,10 @@ Reviewed Candidates** that will be used during the following steps of the review
 ## ITB Evaluation Criteria
 
 The following sections describe the criteria considered during immunogenomics tumor board
-meetings, provide examples, define Accept/Reject criteria where possible and enumerate
-special cases and exceptions.
+meetings, provide examples, and outline common Accept/Review/Reject considerations.
+These criteria are best used as general guidance rather than rigid rules. Final decisions
+should be made case by case, taking into account the specific tumor type, the strength of
+the supporting evidence, and the overall goals of the review.
 
 **Set Clonal DNA VAF**
 
@@ -114,7 +116,7 @@ cutoff to 25%.
 **Variant Type**
 
 Consider whether the variant is a SNV, InDel or DNV. Variants that are insertions, deletions or
-nucleotide variants have different interpretations from the perspective of DNA and RNA VAF,
+dinucleotide variants have different interpretations from the perspective of DNA and RNA VAF,
 reference matches, number of core binding peptides expected, etc.
 
 [**TSL (transcript support level)**](https://grch37.ensembl.org/info/genome/genebuild/transcript_quality_tags.html)
@@ -149,11 +151,11 @@ containing cysteines may later fail identity/purity tests during drug product
 testing.
 
 For most studies using a synthetic long peptide approach for vaccine delivery, if any position in
-the core binding peptide has a cysteine, our group marks the candidate as **Reject**. Some long peptide
-vaccine studies allow some amount of cysteines in the synthesized peptide (e.g. 1 - 2 in the long
-peptide sequence) and may attempt to mitigate the potential issues above (e.g by strategic
-pooling, such as avoiding multiple cysteine containing peptides in the same pool). You may need to clarify if
-Cysteines need to be excluded by contacting your peptide manufacturer.
+the core binding peptide has a cysteine, this is often a strong reason to **Reject** the candidate.
+Some long peptide vaccine studies allow some amount of cysteines in the synthesized peptide (e.g.
+1-2 in the long peptide sequence) and may attempt to mitigate the potential issues above (e.g. by
+strategic pooling, such as avoiding multiple cysteine-containing peptides in the same pool). In
+practice, the final decision may depend on the study design and the manufacturing context.
 
 For studies using DNA/RNA vectors for vaccine delivery, no problematic amino acids should be
 defined in the input YAML file, and this criteria can be ignored.
@@ -170,12 +172,12 @@ _- -allele-specific-binding-thresholds_ and _- -top-score-metric_.
 
 **IC50 and %ile MT (median mutant peptide binding affinity prediction)**
 
-The median IC50 should be less than 500 nm or the median percentile less than 1% for an
-Accept. Exceptions are sometimes made if: (a) the variant is a known cancer driver, (b) elution
-algorithms (e.g. BigMHC_EL, MHCflurryEL Presentation, NetMHCpanEL) have a score with <1.0 %ile, 
-(c) if there is disagreement between prediction algorithms and some predict that it is a
-strong binder (particularly NetMHCpan and MHCflurry as these algorithms have performed well
-in benchmarking exercises.
+These thresholds are often used as a starting point for an Accept decision, but they should not
+be treated as absolute rules. Exceptions are sometimes made if: (a) the variant is a known cancer
+driver, (b) elution algorithms (e.g. BigMHC_EL, MHCflurryEL Presentation, NetMHCpanEL) have a
+score with <1.0% ile, or (c) there is disagreement between prediction algorithms and some predict
+that it is a strong binder (particularly NetMHCpan and MHCflurry, which have performed well in
+benchmarking exercises).
 
 **RNA Expr (gene expression estimate)**
 
@@ -196,7 +198,7 @@ coverage for technical reasons (e.g., in a region suffering from end bias).
 
 This metric is the product of the RNA VAF and Gene Expression value. We have generally
 required a minimum Allele Expression value of 3 for Accept. Exceptions are sometimes made
-and a lower value is accepted in the 1 - 3 range, if the DNA VAF indicates that the variant is
+and a lower value is accepted in the 1-3 range, if the DNA VAF indicates that the variant is
 subclonal but it is otherwise a strong candidate.
 
 **RNA Depth**
@@ -205,7 +207,7 @@ This is not an Accept/Reject criterion but the value is used to interpret the RN
 example, if RNA Depth < 10 , the RNA VAF estimate is not very robust. Low RNA depth reduces
 confidence that the variant was actually detected.
 
-If the total number of variant allele supporting RNA reads is small (e.g. < 5 ), IGV review should
+If the total number of variant allele supporting RNA reads is small (e.g. < 5), IGV review should
 be used to carefully assess the quality of this small number of reads. The number of unique
 cDNA fragments supporting the variant should be examined (e.g. if the supporting RNA count is
 2 , it is possible that there is just 1 unique cDNA fragment, sequenced in both directions).
@@ -236,8 +238,8 @@ A lower DNA VAF is less desirable because it could indicate a sub-clonal variant
 not present in all the cells of the tumor). Low DNA VAFs are also more likely to be false positive
 somatic variants, although this is dependent on the absolute depth of sequencing achieved. If
 the sequence error rate of the platform is low, and the depth is high, somatic variants can be
-robustly identified down to low VAFs (e.g. 1 - 2 %). A default conservative threshold for allowing
-somatic variant calls is often set at 5 % but may be lowered to 1. 5 - 2. 5 % in cases where tumor
+robustly identified down to low VAFs (e.g. 1-2%). A default conservative threshold for allowing
+somatic variant calls is often set at 5% but may be lowered to 1.5-2.5% in cases where tumor
 purity is low.
 
 Correct interpretation of individual DNA VAFs generally must consider multiple factors including:
@@ -269,13 +271,13 @@ criteria or it does but has multiple other issues.
 **Transcript Sets**
 
 The recommended approach for pVACtools analysis is to annotate somatic variants with all
-possible transcript annotations according to VEP (using the - -flag-pick option to note the top
+possible transcript annotations according to VEP (using the --flag-pick option to note the top
 transcript consequence according to VEP but still retain the others). The result of this approach
 is that neoantigen predictions for a single variant can vary from one transcript annotation to
 another. A neoantigen may arise in an exon of one transcript (where the variant is considered
 missense) but be absent in another transcript if the exon is skipped (where the variant is
 considered intronic). Furthermore, a variant with a consistent predicted amino acid change in
-two transcripts may still lead to distinct short (e.g. 8 - 11 - mer) or long (e.g. 25 - 35 - mer) peptides if
+two transcripts may still lead to distinct short (e.g. 8-11-mer) or long (e.g. 25-35-mer) peptides if
 the variant is close to the edge of an exon and the RNA splicing of downstream/upstream exons
 varies. These are just two examples of the many impacts that alternative transcripts may have
 on neoantigen identification and prioritization. While not common, it is possible for entirely
@@ -321,7 +323,7 @@ within the source gene are reported.
 
 Generally a candidate with reference matches is marked as Reject. A larger number of
 reference matches is considered more problematic. A large number of reference matches (e.g.
-\> 3 ) is often observed when the neoantigen peptide has low complexity (e.g. contains a
+\> 3) is often observed when the neoantigen peptide has low complexity (e.g. contains a
 homopolymer stretch) or when it arises from a large gene family with a high degree of homology
 across family members.
 
@@ -330,7 +332,7 @@ related amino acid sequences and how they relate to each other: the Best Peptide
 and the Matched Peptide.
 
 The Best Peptide sequence is the sequence that was evaluated as a neoantigen candidate (e.g.
-an 8 - 11 - mer mutant peptide for class I neoantigens. The Query Sequence is used to search for
+an 8-11-mer mutant peptide for class I neoantigens). The Query Sequence is used to search for
 reference matches related to this sequence. This sequence is created by identifying the position
 of the mutation and adding a flanking sequence of 7 amino acids evenly to either side. The
 Matched Peptide is a substring of the Query Sequence. The Matched Peptide comes from an
@@ -340,11 +342,11 @@ partial overlap with the Best Peptide sequence but the overlap must contain the 
 acid position(s). Refer to the examples below to visualize the relationship between the Best
 Peptide, the Query and the Matched Peptide.
 
-In certain circumstances a candidate with reference matches may be considered acceptable.
-Generally a candidate with a reference match will only be acceptable if the number of reference
-matches is low (e.g. 1 ) and the degree of overlap between the Best Peptide candidate and the
-Matched Peptide is limited (e.g. less than 50 % of amino acids of the Best Peptide occur in the
-Matched Peptide).
+In certain circumstances a candidate with reference matches may still be considered acceptable,
+particularly if the number of reference matches is low (e.g. 1) and the degree of overlap between
+the Best Peptide candidate and the Matched Peptide is limited (e.g. less than 50% of amino
+acids of the Best Peptide occur in the Matched Peptide). These cases are best judged in the
+broader context of the overall candidate evidence.
 
 In the following examples, the Best Peptide sequence is in bold, the mutant amino acid is
 marked in red and the substring that matches between all three sequences is underlined.
@@ -375,15 +377,15 @@ determination and interpretation of reference matches.
 In the case where a neoantigen candidate does not have any qualifying class I peptide
 predictions (no convincing MHC binding, presentation and immunogenicity), a candidate may
 still be Accepted based on class II MHC predictions. Relaxed criteria to Accept a candidate
-based on class II binding are: < 500 nm OR percentile < 2 %. Class II predictions tend to result
+based on class II binding are: <500nm OR percentile <2%. Class II predictions tend to result
 in systematically lower binding affinity values for many class II alleles and a more conservative
-criteria requires the percentile to be < 2 %.
+criteria requires the percentile to be <2%.
 
 
 *Note on class II pairing notations*
 
-In class I MHC notation, a complex is formed between each class I HLA molecule and B 2 M (e.g.
-HLA-B* 45 : 01 - B 2 M). However, since the involvement of B 2 M is a constant its presence is
+In class I MHC notation, a complex is formed between each class I HLA molecule and B2M (e.g.
+HLA-B*45:01-B2M). However, since the involvement of B2M is a constant its presence is
 implied and it is not listed in the HLA notation. In class I, the MHC peptide binding groove is
 internal to the protein encoded by the HLA gene.
 
@@ -396,9 +398,9 @@ HLA-DQ, and HLA-DR.
 each complex. Valid HLA-DP and HLA-DQ dimer notations for neoantigen analysis therefore
 take the form:
 
-[HLA-DPA 1 *NN:NN - HLA-DPB 1 *NN:NN]
+[HLA-DPA 1 *NN:NN-HLA-DPB 1 *NN:NN]
 
-[HLA-DQA 1 *NN:NN - HLA-DQB 1 *NN:NN].
+[HLA-DQA 1 *NN:NN-HLA-DQB 1 *NN:NN].
 
 An individual typically has up to two alleles for DPA 1 , DPB 1 , DQA 1 , and DQB 1. All DPA 1
 alleles can pair with all DPB 1 alleles. All DQA 1 alleles can pair with all DQB 1 alleles.
@@ -411,22 +413,22 @@ Example HLA types for the HLA-DP gene:
 Patient 1. DPA 1 * 01 : 03 , DPA 1 * 02 : 01 DPB 1 * 04 : 02 , DPB 1 * 14 : 01
 
 Valid pairings:
-DPA 1 * 01 : 03 - DPB 1 * 04 : 02
+DPA 1 * 01 : 03-DPB 1 * 04 : 02
 
-DPA 1 * 01 : 03 - DPB 1 * 14 : 01
+DPA 1 * 01 : 03-DPB 1 * 14 : 01
 
-DPA 1 * 02 : 01 - DPB 1 * 04 : 02
-DPA 1 * 02 : 01 - DPB 1 * 14 : 01
+DPA 1 * 02 : 01-DPB 1 * 04 : 02
+DPA 1 * 02 : 01-DPB 1 * 14 : 01
 
 Example HLA types for the HLA-DQ gene:
 Patient 1. DQA 1 * 01 : 01 , DQA 1 * 01 : 02 DQB 1 * 05 : 01 , DQB 1 * 06 : 02
 Valid pairings:
-DQA 1 * 01 : 01 - DQB 1 * 05 : 01
+DQA 1 * 01 : 01-DQB 1 * 05 : 01
 
-DQA 1 * 01 : 01 - DQB 1 * 06 : 02
+DQA 1 * 01 : 01-DQB 1 * 06 : 02
 
-DQA 1 * 01 : 02 - DQB 1 * 05 : 01
-DQA 1 * 01 : 02 - DQB 1 * 06 : 02
+DQA 1 * 01 : 02-DQB 1 * 05 : 01
+DQA 1 * 01 : 02-DQB 1 * 06 : 02
 
 
 In the case of **HLA-DR** genes, by convention, only the beta component is listed because
@@ -452,8 +454,8 @@ far beyond the scope of this document, but in very simple terms:
 binding of a short peptide sequence to the class I/II MHC groove. These algorithms are
 typically trained on in vitro binding data generated by testing individual peptides (from
 peptide libraries) against individual MHC molecules at a range of concentrations to
-determine the concentration required to achieve 50 % displacement of a reference peptide.
-The score is often reported as a 50 % inhibitory concentration (IC 50 ) in nM or as the IC 50
+determine the concentration required to achieve 50% displacement of a reference peptide.
+The score is often reported as a 50% inhibitory concentration (IC 50) in nM or as the IC 50
 percentile rank.
 - MHC **stability** algorithms (e.g. NetMHCstab) predict a related but distinct aspect of the
 peptide-MHC complex. While binding prediction models the likelihood that a given peptide
@@ -498,26 +500,26 @@ provide insight.
 Example with high inter-algorithm agreement (binding affinities all < 100 nm)
 <img width="1434" alt=" high inter-algorithm agreement" src="https://github.com/user-attachments/assets/d628c5df-c5c8-4b43-8a1d-b9ec684746ec" />
 
-Example with low inter-algorithm agreement (binding affinities range from ~ 300 - 10 , 000 nm)
+Example with low inter-algorithm agreement (binding affinities range from ~ 300-10 , 000 nm)
 <img width="1447" alt="low inter-algorithm agreement" src="https://github.com/user-attachments/assets/8d8e85b5-c0b5-42aa-aaea-cab4b0b4d7ba" />
 
 **Processing (aka elution) Algorithm Scores**
 
 Processing (aka elution) algorithm scores are discussed briefly above and generally reported on
-a 0 - 1 scale, with higher numbers indicating a higher probability of being presented. The shape
+a 0-1 scale, with higher numbers indicating a higher probability of being presented. The shape
 of the distribution of these scores varies from algorithm to algorithm so where possible the
 
 
-percentile rank should be considered (e.g. considering a percentile score < 2 % to be
+percentile rank should be considered (e.g. considering a percentile score <2% to be
 acceptable).
 
 **Immunogenicity Algorithm Scores**
 
-Immunogenicity algorithm scores are discussed briefly above and generally reported on a 0 - 1
+Immunogenicity algorithm scores are discussed briefly above and generally reported on a 0-1
 scale, with higher numbers indicating a higher probability of being recognized by a T cell.
 pVACtools currently supports DeepImmuno and BigMHC_IM. DeepImmuno was trained on
-immune validation data from IEDB, but not tumor specific immunogenicity data (citation) and
-predictions are available for only lengths 9 - 10 and a relatively narrow set of HLA alleles
+immune validation data from IEDB, but not tumor specific immunogenicity data and
+predictions are available for only lengths 9-10 and a relatively narrow set of HLA alleles
 compared to the binding and presentation algorithms. In general, Immunogenicity prediction
 algorithms are considered to be experimental at this stage.
 
@@ -539,11 +541,11 @@ peptide sequences for the vaccine design. These considerations include:
 
 - Increased possibility of being a false positive somatic variant. Insertion and deletion somatic
 variants are perhaps more likely to have quality issues, particularly as the number of
-inserted or deleted bases increases (e.g. > 4 ). These variants may be subjected to additional
+inserted or deleted bases increases (e.g. > 4). These variants may be subjected to additional
 scrutiny during manual genomic review of the supporting sequence data.
 - Miscounting of RNA expression support for the variant allele. Accurately calculating the
 variant allele fraction (VAF) for insertion and deletion somatic variants becomes more
-difficult as the number of inserted or deleted bases increases (e.g. > 4 ). Manual genomic
+difficult as the number of inserted or deleted bases increases (e.g. > 4). Manual genomic
 review of the supporting sequence data, including consideration of soft-clipped alignments
 that support the variant should be performed and the VAF estimate adjusted if necessary.
 - Need to adjust length of frameshift sequence analyzed for neoantigens. For performance
@@ -576,7 +578,7 @@ Example of a long frameshift peptide sequence (qualifying class I peptide region
 
 **Dinucleotide mutations**
 
-When dinucleotide variants (DNVs) occur (e.g. chr 14 - 60724007 - 60724008 - GG-TT) pVACtools
+When dinucleotide variants (DNVs) occur (e.g. chr 14-60724007-60724008-GG-TT) pVACtools
 will automatically incorporate both nucleotide changes into the predicted short and long peptide
 sequences. Neoantigen candidates from these variants can be interpreted similarly to a single
 nucleotide variant with one substantial caveat. The VAF for these variants may not be
@@ -586,15 +588,15 @@ in IGV can be used to determine the correct VAF.
 **Anchor Heatmap examination**
 
 The anchor heatmap visualization provided in pVACview reflects an analysis approach
-previously described and published ([Xia, et al. Science Immunology, 2023](https://www.science.org/doi/10.1126/sciimmunol.abg2200). A systematic
+previously described and published ([Xia, et al. Science Immunology, 2023](https://www.science.org/doi/10.1126/sciimmunol.abg2200)). A systematic
 computational analysis was performed to determine for each HLA allele, what positions of that
 allele act to anchor the peptide to the MHC binding groove. Conventional rule of thumb
 approaches may consider the first and last few amino acids to be anchoring and the “center” of
 the peptide to be TCR facing. A more specific rule of thumb may consider position 2 and the last
 position to be the anchor. The anchor heatmap reflects a more systematic approach where the
 anchor positions were determined empirically and automatically selected based on a cutoff. By
-default the AA positions that contribute 80 % of the anchor potential are defined as anchor
-positions. In practice this means that for each allele 1 - 4 positions are generally defined as
+default the AA positions that contribute 80% of the anchor potential are defined as anchor
+positions. In practice this means that for each allele 1-4 positions are generally defined as
 anchor positions.
 
 The anchor heatmap (see example below) displays each candidate peptide in the context of the
@@ -626,7 +628,7 @@ out below.
 
 **Variants Review Files**
 
-- **variants.final.annotated.tsv** - > used to verify that ImmunoNX variants were also called by
+- **variants.final.annotated.tsv** -> used to verify that ImmunoNX variants were also called by
 CLE pipeline
 
 **pVACseq Review Files**
@@ -638,11 +640,11 @@ CLE pipeline
 
 **IGV Review Files**
 
-- **annotated.expression.vcf.gz** - > ImmunoNX variant positions to load into IGV
-- **normal.cram** - > Normal exome DNA alignments to load into IGV
-- **tumor.cram** - > Tumor exome DNA alignments to load into IGV
-- **rnaseq/alignments/MarkedSorted.bam** - > Tumor RNA-seq alignments to load into IGV
-- **gs://griffith-lab-workflow-inputs/human_GRCh38_ens105/annotation_files_for_review/Ensembl105_GRCh38_UcscGenePred_Custom_Coding.ensGene** - > custom transcript
+- **annotated.expression.vcf.gz** -> ImmunoNX variant positions to load into IGV
+- **normal.cram** -> Normal exome DNA alignments to load into IGV
+- **tumor.cram** -> Tumor exome DNA alignments to load into IGV
+- **rnaseq/alignments/MarkedSorted.bam** -> Tumor RNA-seq alignments to load into IGV
+- **gs://griffith-lab-workflow-inputs/human_GRCh38_ens105/annotation_files_for_review/Ensembl105_GRCh38_UcscGenePred_Custom_Coding.ensGene** -> custom transcript
 annotation track containing only transcripts acceptable for neoantigen identification, any `.gtf` file will work here
 
 
@@ -663,39 +665,39 @@ amplification of the same source DNA fragment).
 `qc/fda_metrics/aligned_$sample_dna/table_metrics/$sample_dna_aligned_metrics.txt`
     - Qualitative description of these counts:
         - < 40,000,000 is poor
-        - 40,000,000 - 50,000,000 is acceptable
-        - 5,000,000 - 100,000,000 is good
+        - 40,000,000-50,000,000 is acceptable
+        - 50,000,000-100,000,000 is good
         - \> 100,000,000 is excellent
 - Summarize **duplication** rates for tumor/normal DNA samples
     - “Mapped Read Duplication” from file:
 `qc/fda_metrics/aligned_normal_dna/table_metrics/normal_dna_aligned_metrics.txt`
     - Qualitative description of these rates:
-        - \> 75 % is very poor
-        - 50 - 75 % is poor
-        - 30 - 50 % is acceptable
-        - 20 - 30 % good
-        - < 20 % is excellent
+        - \> 75% is very poor
+        - 50-75% is poor
+        - 30-50% is acceptable
+        - 20-30% good
+        - <20% is excellent
 - Check Somalier results for sample tumor/normal **sample relatedness**.
     - “Relatedness” column from file: `qc/concordance/concordance.somalier.pairs.tsv`
     - Qualitative description of these rates:
-        - \> 97.5 % is excellent
-        - 95 %- 97.5 % is good
-        - 90 - 95 % is concerning
-        - < 90 % is very concerning
+        - \> 97.5% is excellent
+        - 95%- 97.5% is good
+        - 90-95% is concerning
+        - < 90% is very concerning
 - Check VerifyBamID results for **contamination** of both tumor and normal samples
-    - “FREEMIX” column from file (column 7 ): `qc/$sample/$sample.VerifyBamId.selfSM`
+    - “FREEMIX” column from file (column 7): `qc/$sample/$sample.VerifyBamId.selfSM`
     - Qualitative description of these rates:
         - < 0.025 is good
-        - 0.025 - 0.05 is concerning
+        - 0.025-0.05 is concerning
         - \> 0.05 is very concerning
 - Check RNA-seq metrics for **% reads aligning to transcripts**
     - Find the sum of “PCT_CODING_BASES” and “PCT_UTR_BASES” from file:
     `qc/tumor_rna/rna_metrics.txt`
     - Helpful command: “cut -f 17,18 rna_metrics.txt”
-        - \> 90 % excellent
-        - 75 - 90 % good
-        - 50 - 75 % acceptable 
-        - < 50 % sub-optimal
+        - \> 90% excellent
+        - 75-90% good
+        - 50-75% acceptable 
+        - < 50% sub-optimal
 - Check for evidence of **end bias** in the aligned RNA seq data using file:
 `qc/tumor_rna/rna_metrics.pdf`
     - Visually inspect this plot. If the RNA-seq data is of good quality from intact RNA the
@@ -762,7 +764,7 @@ given to presentation algorithms trained on peptide-elution mass spectrometry da
 
 **Compare variant results to another list of orthogonal variants**
 
-In some cases you might know other variants you are expecting to find in your datat. If you specify that variant file in your YAML for your pipeline runs, check if the variant was also called by the ImmunoNX
+In some cases you might know other variants you are expecting to find in your data. If you specify that variant file in your YAML for your pipeline runs, check if the variant was also called by the ImmunoNX
 pipeline. This status is automatically provided in the “VALIDATED” column in the
 `variants.final.annotated.tsv` file produced by the ImmunoNX pipeline. The orthogonal variants validation status is
 also automatically incorporated into the Neoantigen Candidates review spreadsheet.
@@ -788,9 +790,9 @@ can be used for this step.
 the peptide sequence. Most of these should be handled automatically by pVACtools if it
 was run with the proximal variants option. The definition of “nearby” for the purposes of
 proximal variants review is any variant capable of impacting either the predicted class I
-epitope sequence ( 8 - 11 amino acids), the class II epitope sequence ( 12 - 18 amino acids)
+epitope sequence (8-11 amino acids), the class II epitope sequence (12-18 amino acids)
 or the long peptide sequence that will be used for DNA/RNA vector or peptide
-sequencing ( 35 - 50 amino acids ). If a variant is NOT near the edge of an exon, the
+sequencing (35-50 amino acids). If a variant is NOT near the edge of an exon, the
 proximal space to review may be up to 75 bp in either direction (potentially longer for a
 frameshift variant). If the variant is near the edge of an exon, the proximal space to
 review can be much larger as adjacent exons may be separated by large introns.
@@ -805,8 +807,8 @@ extracted from is actually expressed. Does the RNA-seq data support the expected
 nearby exon-exon junctions? Is there evidence for alternative splicing that might
 influence expression of the mutant allele or the structure of the transcript that expresses
 it (possibly impacting the presumed peptide sequence)? When performing this review
-the following IGV display settings are useful: ( 1 ) “View as pairs” and ( 2 ) “Color
-alignments by” - > “first-of-pair strand”. Note that to perform the transcript isoform review,
+the following IGV display settings are useful: (1) “View as pairs” and (2) “Color
+alignments by” -> “first-of-pair strand”. Note that to perform the transcript isoform review,
 it will be necessary to load the correct Ensembl GTF of transcripts in IGV. 
 
 ## Long Peptide Extraction and Final Report Generation
@@ -858,7 +860,7 @@ exit
 
 A plain text fasta file with each peptide sequence. This will be used for final blast checks and can be used with Pepstats to obtain molecular weights for each peptide for the ordering form.
 
-1. Note that if any changes to peptides are made manually during the genomics review (e.g. to select a different reference transcript, or to correct for a complex variant or proximal variant), this file must be updated to have a one-to-one relationship with the Long Peptides Spreadsheet.
+1. Note that if any changes to peptides are made manually during the genomics review(e.g. to select a different reference transcript, or to correct for a complex variant or proximal variant), this file must be updated to have a one-to-one relationship with the Long Peptides Spreadsheet.
 2. The starting point for this file is the `annotated_filtered.vcf-pass-51mer.fa` file produced by the `pvacseq generate_protein_fasta` tool described above.
    
    Example location: `$case/generate_protein_fasta/candidates/annotated_filtered.vcf-pass-51mer.fa`
@@ -905,7 +907,7 @@ Example storage location: `mcdb046/gcp_immuno/final_results/pVACseq/mhc_ii/mcdb0
 
 ### 5. Executive Report (aka Genomics Review Report)
 
-A narrative report with an executive summary of key findings from each of the major genomics review steps above. This should be created as each step is completed. In addition to summarizing each step, note any special situations with individual candidates. For example, if a complex variant was manually corrected, if candidates were altered or added to reflect transcript annotation issues or observed alternative splicing, if special consideration was given to driver variants, candidates selected based on class II alone, reference matches, etc. If any peptides were determined or corrected by manual work or ad hoc analysis, describe those in detail here along with visualizations if helpful.l.
+A narrative report with an executive summary of key findings from each of the major genomics review steps above. This should be created as each step is completed. In addition to summarizing each step, note any special situations with individual candidates. For example, if a complex variant was manually corrected, if candidates were altered or added to reflect transcript annotation issues or observed alternative splicing, if special consideration was given to driver variants, candidates selected based on class II alone, reference matches, etc. If any peptides were determined or corrected by manual work or ad hoc analysis, describe those in detail here along with visualizations (pVACview or IGV screenshots) if helpful.
 
 
 ## Advanced Topics
@@ -923,8 +925,14 @@ predicted.
 ### Fusion Review
 Open the fusion inspector html '/gcp_immuno_workflow/rnaseq/fusioninspector_evidence/finspector.fusion_inspector_web.html', this web page will show possible fusions with evidence. A believable fusion would be one with 
 - Junction reads + Spanning read counts > 5 and junction reads >= 1
-- The fusion is not a read-through
-  - Left Chr and Right Chr are different OR chromosome are the same BUT Left Strand and Right Strand are different OR chromosome and strand are the same BUT ABS(Left Pos - Right Pos) < 1,000,000 OR Fusion GeneA Name OR Fusion GeneB Name matches a known fusion driver gene
+- The fusion is not a read-through if:
+  - Left Chr and Right Chr are different 
+    OR 
+  - chromosomes are the same BUT Left Strand and Right Strand are different 
+    OR 
+  - chromosome and strand are the same BUT ABS(Left Pos - Right Pos) > 1,000,000 
+    OR 
+  - Fusion GeneA Name OR Fusion GeneB Name matches a known fusion driver gene
 - The fusion has a large anchor support 
 
 #### Example: GMB119

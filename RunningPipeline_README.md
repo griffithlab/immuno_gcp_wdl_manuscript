@@ -58,7 +58,7 @@ Example quotas you might need to request:
 - `Persistent Disk SSD (GB)` -> `us-central1` -> `10 TB`
 
 ### Data governance and security
-Users are responsible for compliance with their local requirements and should consult their institutional, legal and compliance teams when executing this pipeline on sensitive patient data. Here, we describe the measures used in our deployment of ImmunoNX for reference. Institutional use of cloud resources is governed by a Business Associates Agreement established through a cloud services reseller. Network access to compute instances is restricted to SSH connections from institution-controlled IP addresses (resources.sh). Compute resources are transient, provisioned only for the duration of case processing. Sequencing data is held in private cloud storage buckets on which public access protection (PAP) is set automatically during setup (resources.sh). User access uses federated authentication managed by the institution, and project-scoped Identity and Access Management (IAM) permissions provide granular control of user privileges. Cloud resources accessed through institutional accounts are subject to institutional security monitoring, including threat and vulnerability detection platforms (e.g Orca).
+Users are responsible for compliance with their local requirements and should consult their institutional, legal and compliance teams when executing this pipeline on sensitive patient data. Here, we describe the measures used in our deployment of ImmunoNX for reference. Institutional use of cloud resources is governed by a Business Associates Agreement established through a cloud services reseller. Network access to compute instances is restricted to SSH connections from institution-controlled IP addresses (resources.sh). Compute resources are transient, provisioned only for the duration of case processing. Sequencing data is held in private cloud storage buckets on which public access protection (PAP) is set automatically during setup (resources.sh). User access uses federated authentication managed by the institution, and project-scoped Identity and Access Management (IAM) permissions provide granular control of user privileges. Cloud resources accessed through institutional accounts are subject to institutional security monitoring, including threat and vulnerability detection platforms (e.g., Orca).
 
 ### Setup Reminders for New Users
 
@@ -246,7 +246,7 @@ NOTE: You will need to manually create the Google billing project in the console
 ## Local setup
 
 ### First create a working directory on your local system
-The following directory on the local system will contain: (a) a git repository for this tutorial including an example YAML file set up to work with the test HCC1395 data, (b) git repository for the WDL workflows, including the immuno worflow, (c) git repository for tools that help provision and manage our workflow runs on the cloud, (d) raw data that we will download for this tutorial, (e) a YAML file describing the input data and paramters for the analysis, and (f) final results file from the workflow that we will pull down from the cloud after a successful run.
+The following directory on the local system will contain: (a) a git repository for this tutorial including an example YAML file set up to work with the test HCC1395 data, (b) git repository for the WDL workflows, including the immuno workflow, (c) git repository for tools that help provision and manage our workflow runs on the cloud, (d) raw data that we will download for this tutorial, (e) a YAML file describing the input data and parameters for the analysis, and (f) final results file from the workflow that we will pull down from the cloud after a successful run.
 ```bash
 mkdir -p $WORKING_BASE
 cd $WORKING_BASE
@@ -349,7 +349,7 @@ If you get an error during this step, a common cause is that there is some disco
 
 ### Start a Google VM that will run Cromwell and orchestrate completion of the workflow
 
-Note that Cromwell produces a large quantity of database logging. To ensure we have enough space for a least a few runs and to localize intermediate and final results files from the workflow (which include numerous large BAMs) we will specify some extra disk space with `--boot-disk-size=250GB` (default would be 10GB). When not testing, this can probably be safely reduced to 20-40GB. Note that this argument must be listed last after the required arguments for the `start.sh` script.
+Note that Cromwell produces a large quantity of database logging. To ensure we have enough space for at least a few runs and to localize intermediate and final results files from the workflow (which include numerous large BAMs) we will specify some extra disk space with `--boot-disk-size=250GB` (default would be 10GB). When not testing, this can probably be safely reduced to 20-40GB. Note that this argument must be listed last after the required arguments for the `start.sh` script.
 ```bash
 cd $WORKING_BASE/git/cloud-workflows/manual-workflows/
 bash start.sh $GCS_INSTANCE_NAME --server-account $GCS_SERVICE_ACCOUNT --project $GCS_PROJECT --boot-disk-size=250GB
@@ -459,7 +459,7 @@ gsutil ls $GCS_BUCKET_PATH/workflow_artifacts/$WORKFLOW_ID
 exit
 ```
 
-The file `outputs.json` will is a map of output names to their GCS locations. The `pull_outputs.py` script retrieves the output files.
+The file `outputs.json` is a map of output names to their GCS locations. The `pull_outputs.py` script retrieves the output files.
 
 ### Pulling the Outputs from Google Cloud Bucket back to your local system or cluster
 After the work in your Google VM is completed, including `save_artifacts`, and you want to bring your results back to the cluster, leverage the `pull_outputs.py` script with the generated `outputs.json` to retrieve the files.
@@ -504,7 +504,7 @@ exit
 
 ### Once the workflow is done and results retrieved, destroy the Cromwell VM on GCP to avoid wasting resources
 
-Use the following commmand to destroy the Cromwell VM. 
+Use the following command to destroy the Cromwell VM. 
 
 ```bash
 gcloud compute instances delete $GCS_INSTANCE_NAME

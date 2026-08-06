@@ -1,14 +1,15 @@
 # Troubleshooting README
 
  A pipeline run can take hours to days, and when errors occur, it is not always obvious what is going wrong. Here we will provide a guide on how we would go about troubleshooting a pipeline run and give examples and tips on common errors that we have encountered. 
-If you follow these steps and still cannot figure out the error. We encourage posting an issue on this GitHub repository.
+
+If you follow these steps and still cannot figure out the error, we encourage posting an issue on this GitHub repository.
 
 # Pipeline Execution Errors
 
 >[!IMPORTANT]  
->Do not delete your Google VM and any Cromwell-executions folders until your pipeline run has executed successfully. If you deleted the VM or these folders, call-caching cannot be utilized and resources (time/money) will be wasted to re-execute steps that have already been completed successfully.
+>Do not delete your Google VM and any Cromwell-executions folders until your pipeline run has executed successfully. If you delete the VM or these folders, call-caching cannot be utilized and resources (time/money) will be wasted to re-execute steps that have already been completed successfully.
 
-Call caching (also called "shortcutting") is enabled by default. For every task it runs, Cromwell records a hash of the task's command, inputs, and container image. When you submit a workflow, any task whose command, inputs, and container are unchanged is not recomputed, and Cromwell reuses the previous result instead. In practice, if a run needs to be restarted because of a corrupt FASTQ file, error in the YAML, or even a case being rerun with tumor VAF thresholds adjusted in the YAML, etc. only the tasks affected by the change and their downstream steps are re-executed. This ensures that the rerun is much faster and only minimal additional cost is added. 
+Call caching (also called "shortcutting") is enabled by default. For every task it runs, Cromwell records a hash of the task's command, inputs, and container image. When you submit a workflow, any task whose command, inputs, and container are unchanged is not recomputed, and Cromwell reuses the previous result instead. In practice, if a run needs to be restarted because of a corrupt FASTQ file, error in the YAML, or even a case being rerun with tumor VAF thresholds adjusted in the YAML, etc., only the tasks affected by the change and their downstream steps are re-executed. This ensures that the rerun is much faster and only minimal additional cost is added. 
 
 
 ## YAML Issues
@@ -68,7 +69,7 @@ Aug 18 17:57:45 [VM NAME] java[1710]: Check the content of stderr for potential 
 
 The error files for all individual tasks are located in the cromwell-executions folder of the designated Google Bucket. Simply follow the path located in the error file to the stderr file and view it on a web browser. Oftentimes the errors located in this file are much more interpretable and will lead to a conclusion about what the problem is. 
 
-However, if the error is still not interpretable, we begin to do a traceback of pipeline tasks to identify where exactly the problem occurred. In the same folder as the stderr file, explore the other files in the folder, like the `stdout`, `log`, or `script`. The `script` file will let you know what command was run and the inputs needed for that command. Make sure the inputs look correct. **Some common things we have seen are the input files are empty or incredible small, indicating that a process was not completed correctly or was interrupted.**
+However, if the error is still not interpretable, we begin to do a traceback of pipeline tasks to identify where exactly the problem occurred. In the same folder as the stderr file, explore the other files in the folder, like the `stdout`, `log`, or `script`. The `script` file will let you know what command was run and the inputs needed for that command. Make sure the inputs look correct. **Some common things we have seen are the input files are empty or incredibly small, indicating that a process was not completed correctly or was interrupted.**
 
 Note: If `call-caching` was used because you resubmitted a workflow on the same VM, there might be a `place_holder.txt` that indicates where the data is being pulled (cached) from. The file will look like this:
 
@@ -82,15 +83,15 @@ The original outputs can be found at this location: gs://[GCS BUCKET]/cromwell-e
 
 ### Running a step independently 
 
-It might be useful to run a step separately from the rest of the pipeline to try and isolate the issue further. Using the `script` file and the docker from the WDL where that step’s instructions are specfied, you can try and manually rerun the step on VM to try and understand what is failing. 
+It might be useful to run a step separately from the rest of the pipeline to try and isolate the issue further. Using the `script` file and the docker from the WDL where that step’s instructions are specified, you can try and manually rerun the step on VM to try and understand what is failing. 
 
-For example, if we were getting an error during the opitype step, we could find the `script` file used for opitype:
+For example, if we were getting an error during the OptiType step, we could find the `script` file used for OptiType:
 
 ```
 gs://[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-optitype/script
 ```
 
-Where we can see the command to execute Opitype and the files needed:
+Where we can see the command to execute OptiType and the files needed:
 
 ```
 /bin/bash /usr/bin/optitype_script_wdl.sh /tmp . \
@@ -98,11 +99,11 @@ Where we can see the command to execute Opitype and the files needed:
 optitype_tumor /mnt/disks/cromwell_root/[GCS BUCKET]/cromwell-executions/immuno/[WORKFLOW ID]/call-somaticExome/somaticExome/[UNIQUE SUB WORKFLOW ID 1]/call-tumorIndexCram/tumor.cram /mnt/disks/cromwell_root/[GCS REFERENCE FILES BUCKET]/human_GRCh38_ens105/aligner_indices/bwamem2_2.2.1/all_sequences.fa 8 50
 ```
 
-Find the WDL where the opitype execution command is located. It is often helpful to look for tasks on the [analysis-wdls github page](https://github.com/wustl-oncology/analysis-wdls/tree/c0edf02bf3f84766f13df288f3546e499c4bef54) and use search functions to parse through the many WDLs which make up the pipeline. All the specifications for running individual tools are located within the definitions/tools/ directory. So optitype is located at `definitions/tools/optitype_dna.wdl`. 
+Find the WDL where the OptiType execution command is located. It is often helpful to look for tasks on the [analysis-wdls github page](https://github.com/wustl-oncology/analysis-wdls/tree/c0edf02bf3f84766f13df288f3546e499c4bef54) and use search functions to parse through the many WDLs which make up the pipeline. All the specifications for running individual tools are located within the definitions/tools/ directory. So optitype is located at `definitions/tools/optitype_dna.wdl`. 
 
 In this WDL we see the docker image used for this task: `mgibio/immuno_tools-cwl:1.0.2`
 
-Now we have everything we need to rerun the opitype command, independent of the rest of the pipeline. So on the Google VM:
+Now we have everything we need to rerun the OptiType command, independent of the rest of the pipeline. So on the Google VM:
 
 
 ```
@@ -163,7 +164,7 @@ vim /shared/definitions/tools/kallisto.wdl
 
 # edit the appropriate line
 
-# for this example I changed line 11 form
+# for this example I changed line 11 from
 # Int space_needed_gb = 10 + round(size(flatten(fastqs), "GB") + size(kallisto_index, "GB"))
 # to
 # Int space_needed_gb = 30 + round(size(flatten(fastqs), "GB") + size(kallisto_index, "GB"))
@@ -193,7 +194,7 @@ Sometimes the problem is not that the pipeline does not complete successfully bu
 
 There are many thresholds set in the YAML file that have been tested over hundreds of samples, but sometimes adjusting them may be necessary. A common situation is a low tumor content sample. For example, you have pancreatic tumor data and expect to see a KRAS G12 mutation, but the tumor content is low. By default the pipeline filters variants at less than 5% tumor VAF. If the tumor content is known to be low, this threshold can be changed.
 
-Therefore, to reduce variant filtering, we will change the VAF cutoff for Varscan, the VAF cutoff for the fp filter, and also the log likelihood ratio test threshold to allow lower VAF variants through. Note that this may be result in spurious low-quality candidates coming through, and additional scrutiny will be required in the IGV manual assessment steps.
+Therefore, to reduce variant filtering, we will change the VAF cutoff for Varscan, the VAF cutoff for the fp filter, and also the log likelihood ratio test threshold to allow lower VAF variants through. Note that this may result in spurious low-quality candidates coming through, and additional scrutiny will be required in the IGV manual assessment steps.
 
 ```
 #reduce filtering stringency
@@ -254,7 +255,7 @@ An example of a poor end-bias plot.
 
 To fully verify neoantigen peptide candidates, visual inspection in IGV is crucial. Often, IGV review reveals sequencing read issues or algorithmic mistakes that can only be caught visually. Here are a few examples of what you may find.
 
-### High Duplicaton rate
+### High Duplication rate
 
 High duplication rate appeared to create situations where all variant support came from a set of identical/duplicate read alignments. In this screenshot, we see a series of reads that look identical in length, which makes them appear to be sequencing artifacts.
 
@@ -262,12 +263,12 @@ High duplication rate appeared to create situations where all variant support ca
 
 ### Multiple RNA Splicing
 
-Sometimes a candidate has high read support, but when inspecting the RNA read splicing (using a sashimi plot in IGV), we see that the RNA supports splicing to different transcripts. Sometimes the peptide candidate is on a transript that is not as supported as another, or the splicing pattern suggest that the sequence would give rise to a different peptide.
+Sometimes a candidate has high read support, but when inspecting the RNA read splicing (using a sashimi plot in IGV), we see that the RNA supports splicing to different transcripts. Sometimes the peptide candidate is on a transcript that is not as supported as another, or the splicing pattern suggests that the sequence would give rise to a different peptide.
 
 ![CPEB2 alternative splicing](https://github.com/evelyn-schmidt/immuno_gcp_wdl_manuscript/assets/57552529/d341bc01-f80c-4817-881f-1695380f4085)
 
 ### Alterations to the best peptide sequences
 
-Visual inspection often reveals that the best peptide, or more commonly 51mer sequence generated for pepetide manufactoring, need to be changed to fit what the data shows. For example, there might be a heterozygous germline variant that changes the sequence but was not caught by the pipeline's germline variant detector.
+Visual inspection often reveals that the best peptide, or more commonly 51mer sequence generated for peptide manufacturing, needs to be changed to fit what the data shows. For example, there might be a heterozygous germline variant that changes the sequence but was not caught by the pipeline's germline variant detector.
 
 Changes to the best peptide need to be checked by rerunning pVACseq to make sure that the peptide is still a strong and unproblematic binder. See the pVACseq documentation [here](https://pvactools.readthedocs.io/en/latest/pvacseq.html).
