@@ -43,8 +43,8 @@ We will download the chromAlias file from UCSC genome browser and restrict it to
 
 ```
 wget -O $BASEDIR/reference_genome/chromAlias.txt.gz https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/chromAlias.txt.gz
-zgrep 'ensembl' chromAlias.txt.gz > chromAlias.ensembl.txt
-rm chromAlias.txt.gz
+zgrep 'ensembl' $BASEDIR/reference_genome/chromAlias.txt.gz > $BASEDIR/reference_genome/chromAlias.ensembl.txt
+rm $BASEDIR/reference_genome/chromAlias.txt.gz
 ```
 
 ## Ensembl/VEP annotation files
@@ -97,7 +97,7 @@ cat $BASEDIR/rna_seq_annotation/Homo_sapiens.GRCh38.cdna.all.fa.gz $BASEDIR/rna_
 
 #### bwa mem index 
 
-From docker image: `mgibio/alignment_helper-cwl:2.1.1`
+From docker image: `mgibio/alignment_helper-cwl:2.2.1`
 
 ```
 mkdir -p $BASEDIR/aligner_indices/bwamem_0.7.15 
@@ -156,7 +156,7 @@ This command downloads the V3 of the genome [Gnomad Database](https://gnomad.bro
 
 ```
 #Download gnomad V3 VCFs for each chromosome, concatenate, and filter to AF>0.001.
-mkdir $BASEDIR/known_variants/gnomad_temp
+mkdir $BASEDIR/known_variants/gnomad_temp && cd "$_"
 # Step 1: Download VCFs
 for chr in {1..22} X Y; do
   wget https://ftp.ensembl.org/pub/data_files/homo_sapiens/GRCh38/variation_genotype/gnomad/v3.1.2/gnomad.genomes.v3.1.2.sites.chr${chr}_trimmed_info.vcf.bgz
