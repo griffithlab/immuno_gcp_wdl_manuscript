@@ -398,37 +398,36 @@ HLA-DQ, and HLA-DR.
 each complex. Valid HLA-DP and HLA-DQ dimer notations for neoantigen analysis therefore
 take the form:
 
-[HLA-DPA 1 *NN:NN-HLA-DPB 1 *NN:NN]
+[HLA-DPA1 *NN:NN-HLA-DPB1 *NN:NN]
 
-[HLA-DQA 1 *NN:NN-HLA-DQB 1 *NN:NN].
+[HLA-DQA1 *NN:NN-HLA-DQB1 *NN:NN].
 
-An individual typically has up to two alleles for DPA 1 , DPB 1 , DQA 1 , and DQB 1. All DPA 1
-alleles can pair with all DPB 1 alleles. All DQA 1 alleles can pair with all DQB 1 alleles.
+An individual typically has up to two alleles for DPA1 , DPB1 , DQA1 , and DQB1. All DPA1 alleles can pair with all DPB1 alleles. All DQA1 alleles can pair with all DQB1 alleles.
 
 Note that we have encountered algorithms that will report binding predictions for single
 components of HLA-DP and HLA-DQ genes (only alpha or only beta). Such predictions are
 difficult to interpret and should be ignored.
 
 Example HLA types for the HLA-DP gene:
-Patient 1. DPA 1 * 01 : 03 , DPA 1 * 02 : 01 DPB 1 * 04 : 02 , DPB 1 * 14 : 01
+Patient 1. DPA1 * 01 : 03 , DPA1 * 02 : 01 DPB1 * 04 : 02 , DPB1 * 14 : 01
 
 Valid pairings:
-DPA 1 * 01 : 03-DPB 1 * 04 : 02
+DPA1 * 01 : 03 - DPB1 * 04 : 02
 
-DPA 1 * 01 : 03-DPB 1 * 14 : 01
+DPA1 * 01 : 03 - DPB1 * 14 : 01
 
-DPA 1 * 02 : 01-DPB 1 * 04 : 02
-DPA 1 * 02 : 01-DPB 1 * 14 : 01
+DPA1 * 02 : 01 - DPB1 * 04 : 02
+DPA1 * 02 : 01 - DPB1 * 14 : 01
 
 Example HLA types for the HLA-DQ gene:
-Patient 1. DQA 1 * 01 : 01 , DQA 1 * 01 : 02 DQB 1 * 05 : 01 , DQB 1 * 06 : 02
+Patient 1. DQA1 * 01 : 01 , DQA1 * 01 : 02 DQB1 * 05 : 01 , DQB1 * 06 : 02
 Valid pairings:
-DQA 1 * 01 : 01-DQB 1 * 05 : 01
+DQA1 * 01 : 01 - DQB1 * 05 : 01
 
-DQA 1 * 01 : 01-DQB 1 * 06 : 02
+DQA1 * 01 : 01 - DQB1 * 06 : 02
 
-DQA 1 * 01 : 02-DQB 1 * 05 : 01
-DQA 1 * 01 : 02-DQB 1 * 06 : 02
+DQA1 * 01 : 02 - DQB1 * 05 : 01
+DQA1 * 01 : 02 - DQB1 * 06 : 02
 
 
 In the case of **HLA-DR** genes, by convention, only the beta component is listed because
