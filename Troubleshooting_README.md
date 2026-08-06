@@ -1,13 +1,15 @@
 # Troubleshooting README
 
  A pipeline run can take hours to days, and when errors occur, it is not always obvious what is going wrong. Here we will provide a guide on how we would go about troubleshooting a pipeline run and give examples and tips on common errors that we have encountered. 
+If you follow these steps and still cannot figure out the error. We encourage posting an issue on this GitHub repository.
 
- # Pipeline Execution Errors
+# Pipeline Execution Errors
 
 >[!IMPORTANT]  
->Do not delete any Cromwell-executions folders until your pipeline run has executed successfully. If you deleted these folders, call-caching cannot be utilized and resources (time/money) will be wasted to re-execute steps that have already been completed sucessfully.
+>Do not delete your Google VM and any Cromwell-executions folders until your pipeline run has executed successfully. If you deleted the VM or these folders, call-caching cannot be utilized and resources (time/money) will be wasted to re-execute steps that have already been completed successfully.
 
-If you follow these steps and still cannot figure out the error. We encourage posting an issue on this GitHub repository.
+Call caching (also called "shortcutting") is enabled by default. For every task it runs, Cromwell records a hash of the task's command, inputs, and container image. When you submit a workflow, any task whose command, inputs, and container are unchanged is not recomputed, and Cromwell reuses the previous result instead. In practice, if a run needs to be restarted because of a corrupt FASTQ file, error in the YAML, or even a case being rerun with tumor VAF thresholds adjusted in the YAML, etc. only the tasks affected by the change and their downstream steps are re-executed. This ensures that the rerun is much faster and only minimal additional cost is added. 
+
 
 ## YAML Issues
 
